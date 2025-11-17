@@ -171,11 +171,11 @@
         "author_key": "dickinson"
       },
       "bag_of_words": {
-        "total_words": 16035,
+        "total_words": 16038,
         "unique_words": 5491,
         "word_frequencies": {
           "like": 118,
-          "one": 110,
+          "one": 111,
           "upon": 92,
           "little": 92,
           "could": 85,
@@ -292,35 +292,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 30507,
+        "total_tokens": 30510,
         "unique_tokens": 5616,
         "type_token_ratio": 0.1841,
         "hapax_legomena": 3184,
         "hapax_percentage": 56.7,
-        "yules_k": 88.89
+        "yules_k": 88.88
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2434,
-          "verbs": 1828,
-          "adjectives": 1012,
+          "nouns": 2391,
+          "verbs": 1891,
+          "adjectives": 991,
           "adverbs": 604,
-          "pronouns": 674,
-          "prepositions": 1399,
-          "conjunctions": 401,
-          "determiners": 1197,
-          "other": 451
+          "pronouns": 708,
+          "prepositions": 1313,
+          "conjunctions": 373,
+          "determiners": 1268,
+          "other": 461
         },
         "percentages": {
-          "nouns": 24.34,
-          "verbs": 18.28,
-          "adjectives": 10.12,
+          "nouns": 23.91,
+          "verbs": 18.91,
+          "adjectives": 9.91,
           "adverbs": 6.04,
-          "pronouns": 6.74,
-          "prepositions": 13.99,
-          "conjunctions": 4.01,
-          "determiners": 11.97,
-          "other": 4.51
+          "pronouns": 7.08,
+          "prepositions": 13.13,
+          "conjunctions": 3.73,
+          "determiners": 12.68,
+          "other": 4.61
         },
         "total_tagged": 10000
       }
@@ -333,19 +333,19 @@
         "author_key": "browning"
       },
       "bag_of_words": {
-        "total_words": 71103,
-        "unique_words": 10173,
+        "total_words": 71223,
+        "unique_words": 10180,
         "word_frequencies": {
-          "would": 430,
-          "may": 414,
-          "one": 413,
+          "would": 432,
+          "one": 415,
+          "may": 415,
           "us": 401,
           "dear": 379,
           "much": 376,
           "think": 357,
           "see": 347,
           "miss": 325,
-          "could": 297,
+          "could": 298,
           "say": 284,
           "well": 280,
           "shall": 275,
@@ -354,22 +354,22 @@
           "know": 262,
           "like": 259,
           "little": 257,
+          "friend": 243,
           "dearest": 242,
-          "friend": 241,
           "last": 240,
           "write": 240,
           "never": 235,
           "must": 235,
+          "robert": 234,
           "love": 234,
-          "robert": 228,
           "even": 227,
-          "day": 222,
+          "day": 223,
           "tell": 222,
           "first": 219,
           "time": 218,
           "two": 216,
           "footnote": 208,
-          "barrett": 200,
+          "barrett": 204,
           "great": 199,
           "good": 197,
           "better": 191,
@@ -388,7 +388,7 @@
           "believe": 161,
           "read": 160,
           "without": 160,
-          "martin": 158,
+          "martin": 159,
           "new": 155,
           "affectionate": 155,
           "still": 151,
@@ -396,11 +396,11 @@
           "perhaps": 148,
           "letters": 147,
           "way": 146,
+          "browning": 145,
           "made": 145,
           "rather": 145,
           "though": 144,
           "go": 143,
-          "browning": 139,
           "every": 136,
           "come": 134,
           "end": 132,
@@ -414,14 +414,14 @@
           "days": 121,
           "written": 119,
           "course": 119,
+          "world": 118,
           "another": 118,
           "work": 117,
           "england": 117,
+          "poet": 116,
           "poems": 116,
-          "world": 116,
           "take": 115,
           "part": 114,
-          "poet": 113,
           "place": 112,
           "poetry": 112,
           "three": 112,
@@ -454,35 +454,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 160570,
-        "unique_tokens": 10306,
+        "total_tokens": 160713,
+        "unique_tokens": 10313,
         "type_token_ratio": 0.0642,
-        "hapax_legomena": 4699,
-        "hapax_percentage": 45.59,
-        "yules_k": 101.64
+        "hapax_legomena": 4700,
+        "hapax_percentage": 45.57,
+        "yules_k": 101.48
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 1951,
-          "verbs": 1867,
-          "adjectives": 923,
-          "adverbs": 748,
-          "pronouns": 956,
-          "prepositions": 1694,
-          "conjunctions": 472,
-          "determiners": 971,
-          "other": 418
+          "nouns": 1920,
+          "verbs": 1843,
+          "adjectives": 942,
+          "adverbs": 726,
+          "pronouns": 927,
+          "prepositions": 1755,
+          "conjunctions": 504,
+          "determiners": 954,
+          "other": 429
         },
         "percentages": {
-          "nouns": 19.51,
-          "verbs": 18.67,
-          "adjectives": 9.23,
-          "adverbs": 7.48,
-          "pronouns": 9.56,
-          "prepositions": 16.94,
-          "conjunctions": 4.72,
-          "determiners": 9.71,
-          "other": 4.18
+          "nouns": 19.2,
+          "verbs": 18.43,
+          "adjectives": 9.42,
+          "adverbs": 7.26,
+          "pronouns": 9.27,
+          "prepositions": 17.55,
+          "conjunctions": 5.04,
+          "determiners": 9.54,
+          "other": 4.29
         },
         "total_tagged": 10000
       }
@@ -495,7 +495,7 @@
         "author_key": "procter"
       },
       "bag_of_words": {
-        "total_words": 17943,
+        "total_words": 17945,
         "unique_words": 3767,
         "word_frequencies": {
           "heart": 175,
@@ -616,35 +616,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 33434,
+        "total_tokens": 33436,
         "unique_tokens": 3885,
         "type_token_ratio": 0.1162,
         "hapax_legomena": 1790,
         "hapax_percentage": 46.07,
-        "yules_k": 86.51
+        "yules_k": 86.5
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2380,
-          "verbs": 1826,
-          "adjectives": 1117,
-          "adverbs": 642,
-          "pronouns": 786,
-          "prepositions": 1347,
-          "conjunctions": 495,
-          "determiners": 980,
-          "other": 427
+          "nouns": 2290,
+          "verbs": 1881,
+          "adjectives": 1145,
+          "adverbs": 622,
+          "pronouns": 793,
+          "prepositions": 1253,
+          "conjunctions": 554,
+          "determiners": 1039,
+          "other": 423
         },
         "percentages": {
-          "nouns": 23.8,
-          "verbs": 18.26,
-          "adjectives": 11.17,
-          "adverbs": 6.42,
-          "pronouns": 7.86,
-          "prepositions": 13.47,
-          "conjunctions": 4.95,
-          "determiners": 9.8,
-          "other": 4.27
+          "nouns": 22.9,
+          "verbs": 18.81,
+          "adjectives": 11.45,
+          "adverbs": 6.22,
+          "pronouns": 7.93,
+          "prepositions": 12.53,
+          "conjunctions": 5.54,
+          "determiners": 10.39,
+          "other": 4.23
         },
         "total_tagged": 10000
       }
@@ -657,7 +657,7 @@
         "author_key": "procter"
       },
       "bag_of_words": {
-        "total_words": 12899,
+        "total_words": 12901,
         "unique_words": 2906,
         "word_frequencies": {
           "one": 154,
@@ -778,35 +778,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 23908,
+        "total_tokens": 23911,
         "unique_tokens": 3026,
         "type_token_ratio": 0.1266,
         "hapax_legomena": 1385,
         "hapax_percentage": 45.77,
-        "yules_k": 76.83
+        "yules_k": 76.82
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2290,
-          "verbs": 1864,
-          "adjectives": 1093,
-          "adverbs": 725,
-          "pronouns": 830,
-          "prepositions": 1207,
-          "conjunctions": 558,
-          "determiners": 920,
-          "other": 513
+          "nouns": 2279,
+          "verbs": 1868,
+          "adjectives": 1102,
+          "adverbs": 717,
+          "pronouns": 827,
+          "prepositions": 1204,
+          "conjunctions": 565,
+          "determiners": 926,
+          "other": 512
         },
         "percentages": {
-          "nouns": 22.9,
-          "verbs": 18.64,
-          "adjectives": 10.93,
-          "adverbs": 7.25,
-          "pronouns": 8.3,
-          "prepositions": 12.07,
-          "conjunctions": 5.58,
-          "determiners": 9.2,
-          "other": 5.13
+          "nouns": 22.79,
+          "verbs": 18.68,
+          "adjectives": 11.02,
+          "adverbs": 7.17,
+          "pronouns": 8.27,
+          "prepositions": 12.04,
+          "conjunctions": 5.65,
+          "determiners": 9.26,
+          "other": 5.12
         },
         "total_tagged": 10000
       }
@@ -819,7 +819,7 @@
         "author_key": "dickinson"
       },
       "bag_of_words": {
-        "total_words": 6708,
+        "total_words": 6709,
         "unique_words": 3236,
         "word_frequencies": {
           "like": 53,
@@ -940,35 +940,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 12734,
+        "total_tokens": 12735,
         "unique_tokens": 3353,
         "type_token_ratio": 0.2633,
         "hapax_legomena": 2133,
         "hapax_percentage": 63.61,
-        "yules_k": 90.92
+        "yules_k": 90.91
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2318,
-          "verbs": 1921,
-          "adjectives": 1030,
-          "adverbs": 605,
-          "pronouns": 701,
-          "prepositions": 1333,
-          "conjunctions": 415,
-          "determiners": 1230,
-          "other": 447
+          "nouns": 2369,
+          "verbs": 1868,
+          "adjectives": 1044,
+          "adverbs": 589,
+          "pronouns": 696,
+          "prepositions": 1364,
+          "conjunctions": 405,
+          "determiners": 1247,
+          "other": 418
         },
         "percentages": {
-          "nouns": 23.18,
-          "verbs": 19.21,
-          "adjectives": 10.3,
-          "adverbs": 6.05,
-          "pronouns": 7.01,
-          "prepositions": 13.33,
-          "conjunctions": 4.15,
-          "determiners": 12.3,
-          "other": 4.47
+          "nouns": 23.69,
+          "verbs": 18.68,
+          "adjectives": 10.44,
+          "adverbs": 5.89,
+          "pronouns": 6.96,
+          "prepositions": 13.64,
+          "conjunctions": 4.05,
+          "determiners": 12.47,
+          "other": 4.18
         },
         "total_tagged": 10000
       }
@@ -981,15 +981,15 @@
         "author_key": "browning"
       },
       "bag_of_words": {
-        "total_words": 19478,
-        "unique_words": 5705,
+        "total_words": 19493,
+        "unique_words": 5710,
         "word_frequencies": {
           "love": 187,
           "thy": 127,
           "thee": 124,
           "thou": 112,
           "shall": 105,
-          "god": 95,
+          "god": 97,
           "like": 93,
           "heart": 90,
           "eyes": 83,
@@ -1045,8 +1045,8 @@
           "heaven": 34,
           "come": 34,
           "death": 34,
+          "art": 34,
           "fair": 33,
-          "art": 33,
           "things": 33,
           "long": 32,
           "souls": 32,
@@ -1102,35 +1102,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 36519,
-        "unique_tokens": 5830,
-        "type_token_ratio": 0.1596,
-        "hapax_legomena": 3300,
-        "hapax_percentage": 56.6,
-        "yules_k": 78.56
+        "total_tokens": 36535,
+        "unique_tokens": 5835,
+        "type_token_ratio": 0.1597,
+        "hapax_legomena": 3303,
+        "hapax_percentage": 56.61,
+        "yules_k": 78.5
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2496,
-          "verbs": 1701,
-          "adjectives": 1029,
-          "adverbs": 569,
-          "pronouns": 700,
-          "prepositions": 1523,
-          "conjunctions": 474,
-          "determiners": 1036,
-          "other": 472
+          "nouns": 2400,
+          "verbs": 1712,
+          "adjectives": 1054,
+          "adverbs": 573,
+          "pronouns": 742,
+          "prepositions": 1537,
+          "conjunctions": 477,
+          "determiners": 1050,
+          "other": 455
         },
         "percentages": {
-          "nouns": 24.96,
-          "verbs": 17.01,
-          "adjectives": 10.29,
-          "adverbs": 5.69,
-          "pronouns": 7.0,
-          "prepositions": 15.23,
-          "conjunctions": 4.74,
-          "determiners": 10.36,
-          "other": 4.72
+          "nouns": 24.0,
+          "verbs": 17.12,
+          "adjectives": 10.54,
+          "adverbs": 5.73,
+          "pronouns": 7.42,
+          "prepositions": 15.37,
+          "conjunctions": 4.77,
+          "determiners": 10.5,
+          "other": 4.55
         },
         "total_tagged": 10000
       }
@@ -1143,8 +1143,8 @@
         "author_key": "browning"
       },
       "bag_of_words": {
-        "total_words": 18358,
-        "unique_words": 4498,
+        "total_words": 18360,
+        "unique_words": 4499,
         "word_frequencies": {
           "thy": 166,
           "thou": 125,
@@ -1154,8 +1154,8 @@
           "shall": 94,
           "upon": 93,
           "little": 85,
+          "god": 83,
           "like": 82,
-          "god": 82,
           "face": 79,
           "ye": 76,
           "eyes": 74,
@@ -1264,35 +1264,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 34460,
-        "unique_tokens": 4624,
+        "total_tokens": 34462,
+        "unique_tokens": 4625,
         "type_token_ratio": 0.1342,
-        "hapax_legomena": 2333,
-        "hapax_percentage": 50.45,
-        "yules_k": 88.22
+        "hapax_legomena": 2334,
+        "hapax_percentage": 50.46,
+        "yules_k": 88.21
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2407,
-          "verbs": 1735,
-          "adjectives": 1040,
-          "adverbs": 558,
-          "pronouns": 846,
-          "prepositions": 1454,
-          "conjunctions": 451,
-          "determiners": 1101,
-          "other": 408
+          "nouns": 2374,
+          "verbs": 1808,
+          "adjectives": 1085,
+          "adverbs": 556,
+          "pronouns": 813,
+          "prepositions": 1420,
+          "conjunctions": 488,
+          "determiners": 1080,
+          "other": 376
         },
         "percentages": {
-          "nouns": 24.07,
-          "verbs": 17.35,
-          "adjectives": 10.4,
-          "adverbs": 5.58,
-          "pronouns": 8.46,
-          "prepositions": 14.54,
-          "conjunctions": 4.51,
-          "determiners": 11.01,
-          "other": 4.08
+          "nouns": 23.74,
+          "verbs": 18.08,
+          "adjectives": 10.85,
+          "adverbs": 5.56,
+          "pronouns": 8.13,
+          "prepositions": 14.2,
+          "conjunctions": 4.88,
+          "determiners": 10.8,
+          "other": 3.76
         },
         "total_tagged": 10000
       }
@@ -1305,8 +1305,8 @@
         "author_key": "browning"
       },
       "bag_of_words": {
-        "total_words": 24349,
-        "unique_words": 5974,
+        "total_words": 24359,
+        "unique_words": 5975,
         "word_frequencies": {
           "thou": 240,
           "thy": 219,
@@ -1344,8 +1344,8 @@
           "look": 57,
           "said": 56,
           "wail": 56,
+          "curse": 55,
           "back": 54,
-          "curse": 54,
           "go": 53,
           "hear": 53,
           "things": 52,
@@ -1386,10 +1386,10 @@
           "human": 38,
           "without": 37,
           "thus": 37,
+          "eve": 37,
           "poet": 37,
           "stars": 37,
           "gods": 37,
-          "eve": 36,
           "along": 36,
           "set": 36,
           "hath": 36,
@@ -1426,35 +1426,35 @@
         "total_sentences_analyzed": 100
       },
       "vocabulary_richness": {
-        "total_tokens": 46028,
-        "unique_tokens": 6098,
+        "total_tokens": 46038,
+        "unique_tokens": 6099,
         "type_token_ratio": 0.1325,
         "hapax_legomena": 3152,
-        "hapax_percentage": 51.69,
-        "yules_k": 87.58
+        "hapax_percentage": 51.68,
+        "yules_k": 87.54
       },
       "pos_distribution": {
         "counts": {
-          "nouns": 2470,
-          "verbs": 1713,
-          "adjectives": 1063,
-          "adverbs": 503,
-          "pronouns": 751,
-          "prepositions": 1600,
-          "conjunctions": 458,
-          "determiners": 1029,
-          "other": 413
+          "nouns": 2513,
+          "verbs": 1697,
+          "adjectives": 1023,
+          "adverbs": 514,
+          "pronouns": 672,
+          "prepositions": 1579,
+          "conjunctions": 484,
+          "determiners": 1083,
+          "other": 435
         },
         "percentages": {
-          "nouns": 24.7,
-          "verbs": 17.13,
-          "adjectives": 10.63,
-          "adverbs": 5.03,
-          "pronouns": 7.51,
-          "prepositions": 16.0,
-          "conjunctions": 4.58,
-          "determiners": 10.29,
-          "other": 4.13
+          "nouns": 25.13,
+          "verbs": 16.97,
+          "adjectives": 10.23,
+          "adverbs": 5.14,
+          "pronouns": 6.72,
+          "prepositions": 15.79,
+          "conjunctions": 4.84,
+          "determiners": 10.83,
+          "other": 4.35
         },
         "total_tagged": 10000
       }
@@ -1532,11 +1532,11 @@
         "pg12242",
         "pg2679"
       ],
-      "total_words": 27573,
+      "total_words": 27577,
       "unique_words": 5497,
       "word_frequencies": {
         "like": 208,
-        "one": 187,
+        "one": 188,
         "little": 163,
         "upon": 161,
         "could": 144,
@@ -1648,16 +1648,16 @@
         "pg33363",
         "pg37452"
       ],
-      "total_words": 133288,
-      "unique_words": 15719,
+      "total_words": 133435,
+      "unique_words": 15728,
       "word_frequencies": {
-        "one": 719,
+        "one": 721,
         "shall": 691,
         "love": 658,
         "us": 634,
-        "would": 612,
-        "may": 610,
-        "god": 545,
+        "would": 614,
+        "may": 611,
+        "god": 548,
         "like": 541,
         "see": 525,
         "thy": 513,
@@ -1666,7 +1666,7 @@
         "upon": 462,
         "thee": 442,
         "dear": 437,
-        "could": 430,
+        "could": 431,
         "much": 423,
         "little": 415,
         "say": 397,
@@ -1678,8 +1678,8 @@
         "ever": 357,
         "know": 350,
         "still": 347,
+        "day": 338,
         "heart": 337,
-        "day": 337,
         "first": 336,
         "miss": 333,
         "never": 332,
@@ -1691,7 +1691,7 @@
         "hear": 289,
         "man": 285,
         "let": 284,
-        "friend": 281,
+        "friend": 283,
         "though": 280,
         "even": 279,
         "two": 272,
@@ -1704,20 +1704,20 @@
         "ye": 252,
         "new": 249,
         "dearest": 249,
+        "world": 246,
         "back": 245,
-        "world": 244,
         "without": 244,
         "long": 242,
-        "made": 242,
         "better": 242,
+        "made": 242,
         "earth": 240,
         "hope": 235,
-        "robert": 229,
+        "robert": 235,
         "come": 227,
         "thought": 226,
+        "barrett": 220,
         "mine": 220,
         "make": 217,
-        "barrett": 216,
         "soul": 213,
         "indeed": 213,
         "footnote": 210,
@@ -1727,8 +1727,8 @@
         "place": 200,
         "florence": 200,
         "way": 195,
-        "every": 194,
         "men": 194,
+        "every": 194,
         "many": 191,
         "hand": 190,
         "read": 189,
@@ -1737,9 +1737,9 @@
         "death": 187,
         "since": 185,
         "things": 184,
+        "poet": 184,
         "oh": 183,
         "kind": 182,
-        "poet": 181,
         "quite": 180,
         "part": 177,
         "done": 177,
@@ -1748,8 +1748,8 @@
         "away": 174,
         "full": 174,
         "sun": 173,
-        "perhaps": 173,
         "work": 173,
+        "perhaps": 173,
         "another": 170
       }
     },
@@ -1762,7 +1762,7 @@
         "pg2303",
         "pg2304"
       ],
-      "total_words": 30842,
+      "total_words": 30846,
       "unique_words": 4743,
       "word_frequencies": {
         "heart": 315,
