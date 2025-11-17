@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+        code { background: #eee; padding: 2px 6px; }
+    </style>
+</head>
+<body>
+    <h1>Visualization Diagnostic Test</h1>
+
+    <div class="test">
+        <h3>Test 1: JavaScript Enabled</h3>
+        <p id="js-test" class="error">❌ JavaScript is NOT working</p>
+    </div>
+
+    <div class="test">
+        <h3>Test 2: Data File Loaded</h3>
+        <p id="data-test" class="error">❌ Data file not loaded</p>
+    </div>
+
+    <div class="test">
+        <h3>Test 3: External Libraries</h3>
+        <p id="chart-test" class="error">❌ Chart.js not loaded</p>
+        <p id="wordcloud-test" class="error">❌ WordCloud not loaded</p>
+    </div>
+
+    <div class="test">
+        <h3>Instructions</h3>
+        <p>If all tests pass, the main visualization should work!</p>
+        <p><strong>Main visualization file:</strong> <code>index.html</code> (in the same folder as this file)</p>
+        <p><strong>If tests fail:</strong></p>
+        <ul>
+            <li>Make sure all files are in the <code>web/</code> folder</li>
+            <li>Try hard-refreshing (Ctrl+Shift+R or Cmd+Shift+R)</li>
+            <li>Check browser console (F12) for errors</li>
+            <li>Ensure you have internet connection (for CDN libraries)</li>
+        </ul>
+    </div>
+
+    <script src="data-embed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+
+    <script>
+        // Test 1: JavaScript
+        document.getElementById('js-test').innerHTML = '✅ JavaScript is working!';
+        document.getElementById('js-test').className = 'success';
+
+        // Test 2: Data
+        if (typeof EMBEDDED_DATA !== 'undefined') {
+            document.getElementById('data-test').innerHTML =
+                '✅ Data loaded! Found ' + EMBEDDED_DATA.texts.length + ' texts';
+            document.getElementById('data-test').className = 'success';
+        }
+
+        // Test 3: Chart.js
+        setTimeout(() => {
+            if (typeof Chart !== 'undefined') {
+                document.getElementById('chart-test').innerHTML = '✅ Chart.js loaded';
+                document.getElementById('chart-test').className = 'success';
+            }
+        }, 1000);
+
+        // Test 4: WordCloud
+        setTimeout(() => {
+            if (typeof WordCloud !== 'undefined') {
+                document.getElementById('wordcloud-test').innerHTML = '✅ WordCloud loaded';
+                document.getElementById('wordcloud-test').className = 'success';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
