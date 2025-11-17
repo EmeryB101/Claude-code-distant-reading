@@ -1,17 +1,24 @@
-// Embedded analysis data
+// Analysis data (loaded from embedded data or fetch)
 let analysisData = null;
 
-// Load data from JSON file
+// Load data
 async function loadData() {
     try {
-        const response = await fetch('../results/analysis.json');
-        analysisData = await response.json();
-        initializeApp();
+        // Try to use embedded data first
+        if (typeof EMBEDDED_DATA !== 'undefined') {
+            analysisData = EMBEDDED_DATA;
+            initializeApp();
+        } else {
+            // Fallback to fetching JSON file
+            const response = await fetch('../results/analysis.json');
+            analysisData = await response.json();
+            initializeApp();
+        }
     } catch (error) {
         console.error('Error loading data:', error);
         // Show error message to user
         document.querySelector('.content-area').innerHTML =
-            '<div style="padding: 2rem; color: #e74c3c;"><h2>Error Loading Data</h2><p>Could not load analysis.json. Please ensure the file exists in the results directory.</p></div>';
+            '<div style="padding: 2rem; color: #e74c3c;"><h2>Error Loading Data</h2><p>Could not load analysis data. Please ensure data-embed.js is included or analysis.json exists.</p></div>';
     }
 }
 
