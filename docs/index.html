@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distant Reading: 19th Century Women Poets</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Distant Reading Analysis</h1>
+            <h2>19th Century Women Poets</h2>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <h3>Navigation</h3>
+
+                <div class="nav-section">
+                    <h4>View By Text</h4>
+                    <ul id="text-list" class="nav-list"></ul>
+                </div>
+
+                <div class="nav-section">
+                    <h4>View By Author</h4>
+                    <ul id="author-list" class="nav-list"></ul>
+                </div>
+
+                <div class="nav-section">
+                    <h4>Compare</h4>
+                    <button id="compare-btn" class="btn-compare">Compare Selected</button>
+                    <div id="compare-selections"></div>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <div id="view-container">
+                    <div id="overview-view" class="view active">
+                        <h2>Corpus Overview</h2>
+                        <div class="overview-stats"></div>
+                    </div>
+
+                    <div id="text-view" class="view">
+                        <h2 id="text-title"></h2>
+                        <div class="tabs">
+                            <button class="tab active" data-tab="metadata">Overview</button>
+                            <button class="tab" data-tab="wordcloud">Word Cloud</button>
+                            <button class="tab" data-tab="sentiment">Sentiment</button>
+                            <button class="tab" data-tab="style">Style</button>
+                        </div>
+
+                        <div class="tab-content">
+                            <div id="tab-metadata" class="tab-pane active">
+                                <div id="metadata-content"></div>
+                            </div>
+                            <div id="tab-wordcloud" class="tab-pane">
+                                <canvas id="wordcloud-canvas"></canvas>
+                                <div id="word-list"></div>
+                            </div>
+                            <div id="tab-sentiment" class="tab-pane">
+                                <div id="sentiment-content"></div>
+                                <canvas id="sentiment-chart"></canvas>
+                            </div>
+                            <div id="tab-style" class="tab-pane">
+                                <div id="style-content"></div>
+                                <canvas id="pos-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="compare-view" class="view">
+                        <h2>Comparison View</h2>
+                        <div id="comparison-content"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer>
+            <p>Corpus: Project Gutenberg texts of 19th-century women poets</p>
+        </footer>
+    </div>
+
+    <script src="data-embed.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
