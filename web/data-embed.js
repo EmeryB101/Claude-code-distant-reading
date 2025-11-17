@@ -1,3 +1,5 @@
+// Automatically generated - embedded analysis data
+const EMBEDDED_DATA = 
 {
   "corpus_name": "Distant Reading: 19th Century Women Poets",
   "texts": [
@@ -1905,4 +1907,4 @@
       }
     ]
   }
-}
+};
