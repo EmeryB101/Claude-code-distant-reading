@@ -147,6 +147,8 @@ function displayText() {
 }
 
 function renderWordCloud(wordFrequencies, selector) {
+    console.log('=== WORD CLOUD START ===');
+    
     // Clear previous
     d3.select(selector).selectAll('*').remove();
 
@@ -155,117 +157,157 @@ function renderWordCloud(wordFrequencies, selector) {
         .slice(0, 50)
         .map(([word, freq]) => ({ text: word, size: freq }));
 
-    console.log('=== Word Cloud Debug ===');
-    console.log('Rendering', words.length, 'words');
-    console.log('First 5 words:', words.slice(0, 5));
+    console.log('Total words to render:', words.length);
+    console.log('Sample words:', words.slice(0, 3).map(w => `${w.text}:${w.size}`));
 
     // Get container
     const container = document.querySelector(selector);
     if (!container) {
-        console.error('Container not found:', selector);
+        console.error('ERROR: Container not found:', selector);
         return;
     }
 
-    // Fixed dimensions for consistency
-    const width = Math.max(container.offsetWidth || 800, 600);
-    const height = 700;  // Taller canvas for better fit
+    // Fixed dimensions
+    const width = Math.max(container.offsetWidth || 800, 700);
+    const height = 600;
 
-    console.log('Canvas size:', width, 'x', height);
+    console.log('Canvas dimensions:', width, 'x', height);
 
-    // Create SVG with visible background
+    // Create SVG
     const svg = d3.select(selector)
         .append('svg')
         .attr('width', width)
         .attr('height', height)
-        .attr('viewBox', `0 0 ${width} ${height}`)
-        .style('background', 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)')
-        .style('border', '2px solid #667eea')
+        .style('background', 'linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%)')
+        .style('border', '3px solid #00acc1')
         .style('border-radius', '10px')
         .style('display', 'block');
 
-    // Vibrant colors
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
-                    '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B3D9',
-                    '#EC7063', '#5DADE2', '#48C9B0', '#F39C12', '#AF7AC5'];
+    console.log('SVG created');
 
-    // Grid: 10 columns x 5 rows
+    // Vibrant colors
+    const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3',
+                    '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a',
+                    '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+
+    // Grid: 10 columns x 5 rows = 50 words
     const cols = 10;
     const rows = 5;
-    const cellWidth = width / cols;
-    const cellHeight = height / rows;
+    
+    // Add padding
+    const padding = { top: 60, bottom: 40, left: 20, right: 20 };
+    const gridWidth = width - padding.left - padding.right;
+    const gridHeight = height - padding.top - padding.bottom;
+    
+    const cellWidth = gridWidth / cols;
+    const cellHeight = gridHeight / rows;
 
-    console.log('Grid:', cols, 'x', rows);
+    console.log('Grid layout:', cols, 'x', rows);
     console.log('Cell size:', cellWidth.toFixed(1), 'x', cellHeight.toFixed(1));
 
-    // Conservative font sizing - much smaller to guarantee fit
-    const minFreq = d3.min(words, d => d.size);
-    const maxFreq = d3.max(words, d => d.size);
+    // VERY SMALL font sizes to guarantee all words fit
+    const minFreq = d3.min(words, d => d.size) || 1;
+    const maxFreq = d3.max(words, d => d.size) || 10;
     
-    // Use very conservative max font size
-    const maxFontSize = Math.min(16, cellHeight * 0.4, cellWidth * 0.12);
-    const minFontSize = 10;
+    // Super conservative: 8-12px only
+    const maxFontSize = 12;
+    const minFontSize = 8;
 
-    console.log('Font range:', minFontSize, 'to', maxFontSize.toFixed(1), 'px');
+    console.log('Frequency range:', minFreq, '-', maxFreq);
+    console.log('Font size range:', minFontSize, '-', maxFontSize, 'px');
 
     const fontSize = d3.scaleLinear()
         .domain([minFreq, maxFreq])
         .range([minFontSize, maxFontSize]);
 
-    // Add title
+    // Title
     svg.append('text')
         .attr('x', width / 2)
-        .attr('y', 25)
+        .attr('y', 30)
         .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+        .attr('font-size', '20px')
         .attr('font-weight', 'bold')
-        .attr('fill', '#667eea')
+        .attr('fill', '#00695c')
         .text('Top 50 Most Common Words');
 
-    // Render words with padding from top
-    const topPadding = 40;
-    const gridHeight = height - topPadding - 30;
-    const adjustedCellHeight = gridHeight / rows;
-
+    // Render all 50 words in grid
+    console.log('Rendering', words.length, 'words...');
+    
     const textElements = svg.selectAll('.word')
         .data(words)
         .enter()
         .append('text')
         .attr('class', 'word-cloud-word')
-        .attr('x', (d, i) => (i % cols) * cellWidth + cellWidth / 2)
-        .attr('y', (d, i) => topPadding + Math.floor(i / cols) * adjustedCellHeight + adjustedCellHeight / 2)
+        .attr('x', (d, i) => {
+            const col = i % cols;
+            return padding.left + col * cellWidth + cellWidth / 2;
+        })
+        .attr('y', (d, i) => {
+            const row = Math.floor(i / cols);
+            return padding.top + row * cellHeight + cellHeight / 2;
+        })
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .attr('font-size', d => fontSize(d.size) + 'px')
-        .attr('font-weight', 'bold')
+        .attr('font-weight', '600')
         .attr('fill', (d, i) => colors[i % colors.length])
         .style('cursor', 'pointer')
         .text(d => {
-            // Ensure word fits in cell width
+            // Truncate if needed
             const fs = fontSize(d.size);
-            const maxChars = Math.floor(cellWidth / (fs * 0.5));
-            return d.text.length > maxChars ? d.text.substring(0, maxChars - 2) + '..' : d.text;
+            const maxChars = Math.floor(cellWidth / (fs * 0.45));
+            if (d.text.length > maxChars) {
+                return d.text.substring(0, maxChars - 1) + '.';
+            }
+            return d.text;
         })
         .on('mouseover', function() {
-            d3.select(this).attr('opacity', 0.7).attr('font-size', d => (fontSize(d.size) * 1.1) + 'px');
+            d3.select(this).style('opacity', 0.7);
         })
         .on('mouseout', function() {
-            d3.select(this).attr('opacity', 1).attr('font-size', d => fontSize(d.size) + 'px');
+            d3.select(this).style('opacity', 1);
         });
 
-    // Tooltips
+    console.log('Text elements created:', textElements.size());
+
+    // Add tooltips
     textElements.append('title')
         .text(d => `${d.text}: ${d.size} occurrences`);
+
+    // Grid lines for debugging (optional - comment out in production)
+    /*
+    for (let i = 0; i <= cols; i++) {
+        svg.append('line')
+            .attr('x1', padding.left + i * cellWidth)
+            .attr('y1', padding.top)
+            .attr('x2', padding.left + i * cellWidth)
+            .attr('y2', padding.top + gridHeight)
+            .attr('stroke', '#ccc')
+            .attr('stroke-width', 1);
+    }
+    for (let i = 0; i <= rows; i++) {
+        svg.append('line')
+            .attr('x1', padding.left)
+            .attr('y1', padding.top + i * cellHeight)
+            .attr('x2', padding.left + gridWidth)
+            .attr('y2', padding.top + i * cellHeight)
+            .attr('stroke', '#ccc')
+            .attr('stroke-width', 1);
+    }
+    */
 
     // Footer
     svg.append('text')
         .attr('x', width / 2)
-        .attr('y', height - 10)
+        .attr('y', height - 15)
         .attr('text-anchor', 'middle')
-        .attr('font-size', '12px')
-        .attr('fill', '#6c757d')
-        .text(`${words.length} words | Sized by frequency`);
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .attr('fill', '#00695c')
+        .text(`All ${words.length} words displayed | Font: ${minFontSize}-${maxFontSize}px`);
 
-    console.log('✓ Word cloud rendered successfully');
+    console.log('✓ Word cloud rendering complete');
+    console.log('=== WORD CLOUD END ===');
 }
 
 function renderStyleChart(style, selector) {
