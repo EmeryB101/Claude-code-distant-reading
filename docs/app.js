@@ -138,10 +138,12 @@ function displayText() {
 
     document.getElementById('textDisplay').innerHTML = html;
 
-    // Render visualizations
-    renderWordCloud(text.bag_of_words.word_frequencies, '#wordCloud');
-    renderStyleChart(text.style, '#styleChart');
-    renderTopics(text.topics, '#topicsDisplay');
+    // Render visualizations with slight delay to ensure DOM is ready
+    setTimeout(() => {
+        renderWordCloud(text.bag_of_words.word_frequencies, '#wordCloud');
+        renderStyleChart(text.style, '#styleChart');
+        renderTopics(text.topics, '#topicsDisplay');
+    }, 100);
 }
 
 function renderWordCloud(wordFrequencies, selector) {
@@ -154,52 +156,60 @@ function renderWordCloud(wordFrequencies, selector) {
         size: freq
     }));
 
-    // Set up dimensions
-    const width = document.querySelector(selector).offsetWidth;
-    const height = 400;
+    console.log('Rendering word cloud with', words.length, 'words');
+
+    // Get container dimensions
+    const container = document.querySelector(selector);
+    const width = container.offsetWidth || 800;
+    const height = 500;
+
+    console.log('Container dimensions:', width, 'x', height);
 
     // Create SVG
     const svg = d3.select(selector)
         .append('svg')
         .attr('width', width)
-        .attr('height', height);
+        .attr('height', height)
+        .style('background', '#f8f9fa');
 
     // Color scale
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+                    '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B3D9'];
 
     // Find min/max frequencies
     const minFreq = d3.min(words, d => d.size);
     const maxFreq = d3.max(words, d => d.size);
 
-    // Font size scale
-    const fontSize = d3.scalePow()
-        .exponent(0.5)
+    // Font size scale  
+    const fontSize = d3.scaleLinear()
         .domain([minFreq, maxFreq])
-        .range([16, 60]);
+        .range([14, 48]);
 
-    // Simple scatter layout for word cloud
-    words.forEach((word, i) => {
-        const angle = (i / words.length) * 2 * Math.PI;
-        const radius = 50 + Math.random() * 150;
-        word.x = width/2 + Math.cos(angle) * radius;
-        word.y = height/2 + Math.sin(angle) * radius;
-    });
+    // Create grid layout for better visibility
+    const cols = 10;
+    const rows = Math.ceil(words.length / cols);
+    const cellWidth = width / cols;
+    const cellHeight = height / rows;
 
-    // Render words
+    // Render words in grid
     svg.selectAll('text')
         .data(words)
         .enter()
         .append('text')
         .attr('class', 'word-cloud-word')
-        .attr('x', d => d.x)
-        .attr('y', d => d.y)
+        .attr('x', (d, i) => (i % cols) * cellWidth + cellWidth / 2)
+        .attr('y', (d, i) => Math.floor(i / cols) * cellHeight + cellHeight / 2)
         .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
         .attr('font-size', d => fontSize(d.size) + 'px')
         .attr('font-weight', 'bold')
-        .attr('fill', (d, i) => color(i))
+        .attr('fill', (d, i) => colors[i % colors.length])
         .text(d => d.text)
+        .style('cursor', 'pointer')
         .append('title')
-        .text(d => `${d.text}: ${d.size}`);
+        .text(d => `${d.text}: ${d.size} occurrences`);
+
+    console.log('Word cloud rendered successfully');
 }
 
 function renderStyleChart(style, selector) {
@@ -213,8 +223,9 @@ function renderStyleChart(style, selector) {
     })).filter(d => d.percentage > 0).sort((a, b) => b.percentage - a.percentage);
 
     // Set up dimensions
-    const margin = {top: 20, right: 30, bottom: 60, left: 60};
-    const width = document.querySelector(selector).offsetWidth - margin.left - margin.right;
+    const margin = {top: 20, right: 30, bottom: 80, left: 60};
+    const container = document.querySelector(selector);
+    const width = (container.offsetWidth || 800) - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
     // Create SVG
@@ -228,15 +239,16 @@ function renderStyleChart(style, selector) {
     // Scales
     const x = d3.scaleBand()
         .range([0, width])
-        .padding(0.1)
+        .padding(0.2)
         .domain(data.map(d => d.category));
 
     const y = d3.scaleLinear()
         .range([height, 0])
-        .domain([0, d3.max(data, d => d.percentage)]);
+        .domain([0, d3.max(data, d => d.percentage) * 1.1]);
 
     // Color scale
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe',
+                    '#43e97b', '#38f9d7', '#fa709a', '#fee140'];
 
     // Bars
     svg.selectAll('.bar')
@@ -248,8 +260,22 @@ function renderStyleChart(style, selector) {
         .attr('y', d => y(d.percentage))
         .attr('width', x.bandwidth())
         .attr('height', d => height - y(d.percentage))
-        .attr('fill', (d, i) => color(i))
-        .style('opacity', 0.8);
+        .attr('fill', (d, i) => colors[i % colors.length])
+        .attr('rx', 4)
+        .style('opacity', 0.9);
+
+    // Add value labels on bars
+    svg.selectAll('.label')
+        .data(data)
+        .enter()
+        .append('text')
+        .attr('class', 'label')
+        .attr('x', d => x(d.category) + x.bandwidth() / 2)
+        .attr('y', d => y(d.percentage) - 5)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .text(d => d.percentage.toFixed(1) + '%');
 
     // X axis
     svg.append('g')
@@ -257,11 +283,13 @@ function renderStyleChart(style, selector) {
         .call(d3.axisBottom(x))
         .selectAll('text')
         .attr('transform', 'rotate(-45)')
-        .style('text-anchor', 'end');
+        .style('text-anchor', 'end')
+        .style('font-size', '11px');
 
     // Y axis
     svg.append('g')
-        .call(d3.axisLeft(y).ticks(10));
+        .call(d3.axisLeft(y).ticks(10).tickFormat(d => d + '%'))
+        .style('font-size', '11px');
 
     // Y axis label
     svg.append('text')
@@ -270,6 +298,8 @@ function renderStyleChart(style, selector) {
         .attr('x', 0 - (height / 2))
         .attr('dy', '1em')
         .style('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
         .text('Percentage (%)');
 }
 
@@ -282,7 +312,7 @@ function renderTopics(topics, selector) {
     let html = '';
     topics.topics.forEach(topic => {
         html += `<div class="mb-3">
-            <h6>Topic ${topic.topic_id}</h6>
+            <h6><strong>Topic ${topic.topic_id}</strong></h6>
             <div>`;
         topic.top_words.forEach(word => {
             html += `<span class="topic-badge">${word}</span>`;
@@ -309,13 +339,17 @@ function compareTexts() {
 
     const html = `
         <div class="comparison-section">
-            <h4 class="mb-4 text-center">Comparison</h4>
+            <h4 class="mb-4 text-center">Side-by-Side Comparison</h4>
 
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header">${text1.metadata.title}</div>
+                        <div class="card-header"><strong>${text1.metadata.title}</strong></div>
                         <div class="card-body">
+                            <div class="metric-row">
+                                <span class="metric-label">Author:</span>
+                                <span class="metric-value">${text1.metadata.author}</span>
+                            </div>
                             <div class="metric-row">
                                 <span class="metric-label">Words:</span>
                                 <span class="metric-value">${text1.bag_of_words.total_words.toLocaleString()}</span>
@@ -335,21 +369,25 @@ function compareTexts() {
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header">Word Cloud</div>
+                        <div class="card-header"><strong>Top 50 Words</strong></div>
                         <div class="card-body">
                             <div id="wordCloud1"></div>
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header">Topics</div>
+                        <div class="card-header"><strong>Topics</strong></div>
                         <div class="card-body" id="topics1"></div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header">${text2.metadata.title}</div>
+                        <div class="card-header"><strong>${text2.metadata.title}</strong></div>
                         <div class="card-body">
+                            <div class="metric-row">
+                                <span class="metric-label">Author:</span>
+                                <span class="metric-value">${text2.metadata.author}</span>
+                            </div>
                             <div class="metric-row">
                                 <span class="metric-label">Words:</span>
                                 <span class="metric-value">${text2.bag_of_words.total_words.toLocaleString()}</span>
@@ -369,13 +407,13 @@ function compareTexts() {
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header">Word Cloud</div>
+                        <div class="card-header"><strong>Top 50 Words</strong></div>
                         <div class="card-body">
                             <div id="wordCloud2"></div>
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header">Topics</div>
+                        <div class="card-header"><strong>Topics</strong></div>
                         <div class="card-body" id="topics2"></div>
                     </div>
                 </div>
@@ -385,11 +423,11 @@ function compareTexts() {
 
     document.getElementById('comparisonDisplay').innerHTML = html;
 
-    // Render visualizations
+    // Render visualizations with delay
     setTimeout(() => {
         renderWordCloud(text1.bag_of_words.word_frequencies, '#wordCloud1');
         renderWordCloud(text2.bag_of_words.word_frequencies, '#wordCloud2');
         renderTopics(text1.topics, '#topics1');
         renderTopics(text2.topics, '#topics2');
-    }, 100);
+    }, 200);
 }
