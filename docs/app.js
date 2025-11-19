@@ -160,8 +160,13 @@ function renderWordCloud(wordFrequencies, selector) {
 
     // Get container dimensions
     const container = document.querySelector(selector);
+    if (!container) {
+        console.error('Container not found:', selector);
+        return;
+    }
+
     const width = container.offsetWidth || 800;
-    const height = 500;
+    const height = 600;  // Increased height for better spacing
 
     console.log('Container dimensions:', width, 'x', height);
 
@@ -170,9 +175,11 @@ function renderWordCloud(wordFrequencies, selector) {
         .append('svg')
         .attr('width', width)
         .attr('height', height)
-        .style('background', '#f8f9fa');
+        .style('background', '#f8f9fa')
+        .style('border', '1px solid #dee2e6')
+        .style('border-radius', '8px');
 
-    // Color scale
+    // Color scale - vibrant colors
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
                     '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B3D9'];
 
@@ -180,20 +187,30 @@ function renderWordCloud(wordFrequencies, selector) {
     const minFreq = d3.min(words, d => d.size);
     const maxFreq = d3.max(words, d => d.size);
 
-    // Font size scale  
-    const fontSize = d3.scaleLinear()
-        .domain([minFreq, maxFreq])
-        .range([14, 48]);
+    console.log('Frequency range:', minFreq, 'to', maxFreq);
 
-    // Create grid layout for better visibility
+    // Grid layout: 10 columns x 5 rows for 50 words
     const cols = 10;
-    const rows = Math.ceil(words.length / cols);
+    const rows = 5;
     const cellWidth = width / cols;
     const cellHeight = height / rows;
 
+    console.log('Cell dimensions:', cellWidth, 'x', cellHeight);
+
+    // Calculate max font size that fits in cell
+    const maxFontSize = Math.min(cellHeight * 0.6, cellWidth * 0.15, 24);
+    const minFontSize = Math.max(maxFontSize * 0.4, 10);
+
+    console.log('Font size range:', minFontSize, 'to', maxFontSize);
+
+    // Font size scale based on frequency
+    const fontSize = d3.scaleLinear()
+        .domain([minFreq, maxFreq])
+        .range([minFontSize, maxFontSize]);
+
     // Render words in grid
-    svg.selectAll('text')
-        .data(words)
+    const textElements = svg.selectAll('text')
+        .data(words.slice(0, 50))  // Ensure exactly 50 words
         .enter()
         .append('text')
         .attr('class', 'word-cloud-word')
@@ -204,12 +221,27 @@ function renderWordCloud(wordFrequencies, selector) {
         .attr('font-size', d => fontSize(d.size) + 'px')
         .attr('font-weight', 'bold')
         .attr('fill', (d, i) => colors[i % colors.length])
-        .text(d => d.text)
         .style('cursor', 'pointer')
-        .append('title')
+        .text(d => {
+            // Truncate long words to fit in cell
+            const maxChars = Math.floor(cellWidth / (fontSize(d.size) * 0.6));
+            return d.text.length > maxChars ? d.text.substring(0, maxChars) + '...' : d.text;
+        });
+
+    // Add tooltips
+    textElements.append('title')
         .text(d => `${d.text}: ${d.size} occurrences`);
 
-    console.log('Word cloud rendered successfully');
+    // Add word count indicator
+    svg.append('text')
+        .attr('x', width - 10)
+        .attr('y', height - 10)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '11px')
+        .attr('fill', '#6c757d')
+        .text(`${words.length} words displayed`);
+
+    console.log('Word cloud rendered successfully with', words.length, 'words');
 }
 
 function renderStyleChart(style, selector) {
