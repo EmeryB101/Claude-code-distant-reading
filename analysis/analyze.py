@@ -96,7 +96,13 @@ class TextAnalyzer:
         if not self.tokens:
             self.tokenize()
 
-        word_freq = Counter(self.tokens)
+        # Additional words to filter out beyond stopwords
+        additional_filters = {'like', 'may', 'one', 'upon', 'shall', 'would', 'could'}
+
+        # Filter tokens
+        filtered_tokens = [token for token in self.tokens if token not in additional_filters]
+
+        word_freq = Counter(filtered_tokens)
         return {
             'total_words': len(self.tokens),
             'unique_words': len(set(self.tokens)),
