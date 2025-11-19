@@ -350,12 +350,12 @@ function renderWordCloud(wordFrequencies, title) {
     console.log('Word frequencies received:', wordFrequencies);
     console.log('Total words:', Object.keys(wordFrequencies).length);
 
-    // Get top 80 words for display
+    // Get top 10 words for clear, focused display
     const topWords = Object.entries(wordFrequencies)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 80);
+        .slice(0, 10);
 
-    console.log('Top 10 words:', topWords.slice(0, 10));
+    console.log('Top 10 words:', topWords);
 
     if (topWords.length === 0) {
         wordList.innerHTML = '<p>No words available</p>';
@@ -387,14 +387,14 @@ function renderWordCloud(wordFrequencies, title) {
         wordSpan.className = 'cloud-word';
         wordSpan.textContent = word;
 
-        // Calculate font size
+        // Calculate font size - larger for top 10
         let fontSize;
         if (range === 0) {
-            fontSize = 24;
+            fontSize = 48;
         } else {
             const normalized = (freq - minFreq) / range;
             const scaled = Math.pow(normalized, 0.5);
-            fontSize = 14 + (scaled * 46); // 14px to 60px
+            fontSize = 28 + (scaled * 52); // 28px to 80px for better visibility
         }
 
         // Random color from palette
@@ -634,10 +634,10 @@ function renderComparisonWordCloud(wordFrequencies, title, canvasId) {
 
     console.log(`Rendering comparison word cloud: ${title} on ${canvasId}`);
 
-    // Get top 60 words for comparison clouds
+    // Get top 10 words for clear, focused comparison clouds
     const topWords = Object.entries(wordFrequencies)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 60);
+        .slice(0, 10);
 
     if (topWords.length === 0) {
         canvas.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">No words to display</p>';
@@ -669,14 +669,14 @@ function renderComparisonWordCloud(wordFrequencies, title, canvasId) {
         wordSpan.className = 'cloud-word';
         wordSpan.textContent = word;
 
-        // Calculate font size
+        // Calculate font size - larger for top 10
         let fontSize;
         if (range === 0) {
-            fontSize = 20;
+            fontSize = 44;
         } else {
             const normalized = (freq - minFreq) / range;
             const scaled = Math.pow(normalized, 0.5);
-            fontSize = 12 + (scaled * 38); // 12px to 50px
+            fontSize = 24 + (scaled * 48); // 24px to 72px for better visibility
         }
 
         // Assign color from palette
