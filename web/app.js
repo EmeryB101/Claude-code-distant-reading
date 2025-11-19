@@ -65,7 +65,7 @@ function displayText() {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="mb-0">Metadata</h4>
+                        <h4 class="mb-0">📊 Metadata</h4>
                     </div>
                     <div class="card-body">
                         <div class="metric-row">
@@ -101,7 +101,7 @@ function displayText() {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="mb-0">Top 50 Words</h4>
+                        <h4 class="mb-0">☁️ Top 50 Words</h4>
                     </div>
                     <div class="card-body">
                         <div id="wordCloud"></div>
@@ -114,7 +114,7 @@ function displayText() {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="mb-0">Style Analysis (Parts of Speech)</h4>
+                        <h4 class="mb-0">📝 Style Analysis (Parts of Speech)</h4>
                     </div>
                     <div class="card-body">
                         <div id="styleChart"></div>
@@ -127,7 +127,7 @@ function displayText() {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="mb-0">Topics</h4>
+                        <h4 class="mb-0">🔍 Topics</h4>
                     </div>
                     <div class="card-body" id="topicsDisplay">
                     </div>
@@ -138,7 +138,7 @@ function displayText() {
 
     document.getElementById('textDisplay').innerHTML = html;
 
-    // Render visualizations with slight delay to ensure DOM is ready
+    // Render visualizations
     setTimeout(() => {
         renderWordCloud(text.bag_of_words.word_frequencies, '#wordCloud');
         renderStyleChart(text.style, '#styleChart');
@@ -147,167 +147,113 @@ function displayText() {
 }
 
 function renderWordCloud(wordFrequencies, selector) {
-    console.log('=== WORD CLOUD START ===');
+    console.log('=== RENDERING WORD CLOUD ===');
     
     // Clear previous
-    d3.select(selector).selectAll('*').remove();
-
+    const container = document.querySelector(selector);
+    if (!container) {
+        console.error('Container not found:', selector);
+        return;
+    }
+    
+    container.innerHTML = '';
+    
     // Get top 50 words
     const words = Object.entries(wordFrequencies)
         .slice(0, 50)
         .map(([word, freq]) => ({ text: word, size: freq }));
-
-    console.log('Total words to render:', words.length);
-    console.log('Sample words:', words.slice(0, 3).map(w => `${w.text}:${w.size}`));
-
-    // Get container
-    const container = document.querySelector(selector);
-    if (!container) {
-        console.error('ERROR: Container not found:', selector);
-        return;
-    }
-
-    // Fixed dimensions
-    const width = Math.max(container.offsetWidth || 800, 700);
-    const height = 600;
-
-    console.log('Canvas dimensions:', width, 'x', height);
-
-    // Create SVG
-    const svg = d3.select(selector)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .style('background', 'linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%)')
-        .style('border', '3px solid #00acc1')
-        .style('border-radius', '10px')
-        .style('display', 'block');
-
-    console.log('SVG created');
-
-    // Vibrant colors
-    const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3',
-                    '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a',
-                    '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
-
-    // Grid: 10 columns x 5 rows = 50 words
-    const cols = 10;
-    const rows = 5;
     
-    // Add padding
-    const padding = { top: 60, bottom: 40, left: 20, right: 20 };
-    const gridWidth = width - padding.left - padding.right;
-    const gridHeight = height - padding.top - padding.bottom;
+    console.log('Rendering', words.length, 'words');
     
-    const cellWidth = gridWidth / cols;
-    const cellHeight = gridHeight / rows;
-
-    console.log('Grid layout:', cols, 'x', rows);
-    console.log('Cell size:', cellWidth.toFixed(1), 'x', cellHeight.toFixed(1));
-
-    // VERY SMALL font sizes to guarantee all words fit
-    const minFreq = d3.min(words, d => d.size) || 1;
-    const maxFreq = d3.max(words, d => d.size) || 10;
+    // Find frequency range
+    const minFreq = Math.min(...words.map(w => w.size));
+    const maxFreq = Math.max(...words.map(w => w.size));
     
-    // Super conservative: 8-12px only
-    const maxFontSize = 12;
-    const minFontSize = 8;
-
-    console.log('Frequency range:', minFreq, '-', maxFreq);
-    console.log('Font size range:', minFontSize, '-', maxFontSize, 'px');
-
-    const fontSize = d3.scaleLinear()
-        .domain([minFreq, maxFreq])
-        .range([minFontSize, maxFontSize]);
-
-    // Title
-    svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', 30)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '20px')
-        .attr('font-weight', 'bold')
-        .attr('fill', '#00695c')
-        .text('Top 50 Most Common Words');
-
-    // Render all 50 words in grid
-    console.log('Rendering', words.length, 'words...');
+    console.log('Frequency range:', minFreq, 'to', maxFreq);
     
-    const textElements = svg.selectAll('.word')
-        .data(words)
-        .enter()
-        .append('text')
-        .attr('class', 'word-cloud-word')
-        .attr('x', (d, i) => {
-            const col = i % cols;
-            return padding.left + col * cellWidth + cellWidth / 2;
-        })
-        .attr('y', (d, i) => {
-            const row = Math.floor(i / cols);
-            return padding.top + row * cellHeight + cellHeight / 2;
-        })
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle')
-        .attr('font-size', d => fontSize(d.size) + 'px')
-        .attr('font-weight', '600')
-        .attr('fill', (d, i) => colors[i % colors.length])
-        .style('cursor', 'pointer')
-        .text(d => {
-            // Truncate if needed
-            const fs = fontSize(d.size);
-            const maxChars = Math.floor(cellWidth / (fs * 0.45));
-            if (d.text.length > maxChars) {
-                return d.text.substring(0, maxChars - 1) + '.';
-            }
-            return d.text;
-        })
-        .on('mouseover', function() {
-            d3.select(this).style('opacity', 0.7);
-        })
-        .on('mouseout', function() {
-            d3.select(this).style('opacity', 1);
+    // Create wrapper div
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 8px;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        min-height: 400px;
+    `;
+    
+    // Vibrant color palette
+    const colors = [
+        '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+        '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739',
+        '#52B3D9', '#EC7063', '#5DADE2', '#48C9B0', '#F39C12'
+    ];
+    
+    // Create each word
+    words.forEach((word, index) => {
+        // Calculate font size (8-14px range)
+        const normalized = (word.size - minFreq) / (maxFreq - minFreq || 1);
+        const fontSize = 8 + (normalized * 6); // 8-14px
+        
+        const wordDiv = document.createElement('div');
+        wordDiv.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: ${fontSize}px;
+            font-weight: bold;
+            color: ${colors[index % colors.length]};
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            word-break: break-word;
+            min-height: 40px;
+        `;
+        
+        wordDiv.textContent = word.text;
+        wordDiv.title = `${word.text}: ${word.size} occurrences`;
+        
+        // Hover effect
+        wordDiv.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            this.style.zIndex = '10';
         });
-
-    console.log('Text elements created:', textElements.size());
-
-    // Add tooltips
-    textElements.append('title')
-        .text(d => `${d.text}: ${d.size} occurrences`);
-
-    // Grid lines for debugging (optional - comment out in production)
-    /*
-    for (let i = 0; i <= cols; i++) {
-        svg.append('line')
-            .attr('x1', padding.left + i * cellWidth)
-            .attr('y1', padding.top)
-            .attr('x2', padding.left + i * cellWidth)
-            .attr('y2', padding.top + gridHeight)
-            .attr('stroke', '#ccc')
-            .attr('stroke-width', 1);
-    }
-    for (let i = 0; i <= rows; i++) {
-        svg.append('line')
-            .attr('x1', padding.left)
-            .attr('y1', padding.top + i * cellHeight)
-            .attr('x2', padding.left + gridWidth)
-            .attr('y2', padding.top + i * cellHeight)
-            .attr('stroke', '#ccc')
-            .attr('stroke-width', 1);
-    }
-    */
-
-    // Footer
-    svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', height - 15)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '14px')
-        .attr('font-weight', 'bold')
-        .attr('fill', '#00695c')
-        .text(`All ${words.length} words displayed | Font: ${minFontSize}-${maxFontSize}px`);
-
-    console.log('✓ Word cloud rendering complete');
-    console.log('=== WORD CLOUD END ===');
+        
+        wordDiv.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            this.style.zIndex = '1';
+        });
+        
+        wrapper.appendChild(wordDiv);
+    });
+    
+    // Add title
+    const title = document.createElement('div');
+    title.style.cssText = `
+        grid-column: 1 / -1;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        margin-bottom: 10px;
+    `;
+    title.textContent = `Top 50 Words (${words.length} displayed)`;
+    wrapper.insertBefore(title, wrapper.firstChild);
+    
+    container.appendChild(wrapper);
+    
+    console.log('✓ Word cloud rendered with', words.length, 'words');
 }
 
 function renderStyleChart(style, selector) {
@@ -344,7 +290,7 @@ function renderStyleChart(style, selector) {
         .range([height, 0])
         .domain([0, d3.max(data, d => d.percentage) * 1.1]);
 
-    // Color scale
+    // Gradient colors
     const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe',
                     '#43e97b', '#38f9d7', '#fa709a', '#fee140'];
 
@@ -359,10 +305,10 @@ function renderStyleChart(style, selector) {
         .attr('width', x.bandwidth())
         .attr('height', d => height - y(d.percentage))
         .attr('fill', (d, i) => colors[i % colors.length])
-        .attr('rx', 4)
+        .attr('rx', 6)
         .style('opacity', 0.9);
 
-    // Add value labels on bars
+    // Value labels
     svg.selectAll('.label')
         .data(data)
         .enter()
@@ -373,6 +319,7 @@ function renderStyleChart(style, selector) {
         .attr('text-anchor', 'middle')
         .style('font-size', '12px')
         .style('font-weight', 'bold')
+        .style('fill', '#333')
         .text(d => d.percentage.toFixed(1) + '%');
 
     // X axis
@@ -409,11 +356,12 @@ function renderTopics(topics, selector) {
 
     let html = '';
     topics.topics.forEach(topic => {
-        html += `<div class="mb-3">
-            <h6><strong>Topic ${topic.topic_id}</strong></h6>
+        html += `<div class="mb-4">
+            <h6 style="color: #667eea;"><strong>📌 Topic ${topic.topic_id}</strong></h6>
             <div>`;
-        topic.top_words.forEach(word => {
-            html += `<span class="topic-badge">${word}</span>`;
+        topic.top_words.forEach((word, idx) => {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe'];
+            html += `<span class="topic-badge" style="background: ${colors[idx % colors.length]};">${word}</span>`;
         });
         html += `</div></div>`;
     });
@@ -437,7 +385,7 @@ function compareTexts() {
 
     const html = `
         <div class="comparison-section">
-            <h4 class="mb-4 text-center">Side-by-Side Comparison</h4>
+            <h4 class="mb-4 text-center" style="color: #667eea;">🔄 Side-by-Side Comparison</h4>
 
             <div class="row">
                 <div class="col-md-6">
@@ -467,13 +415,13 @@ function compareTexts() {
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header"><strong>Top 50 Words</strong></div>
+                        <div class="card-header"><strong>☁️ Top 50 Words</strong></div>
                         <div class="card-body">
                             <div id="wordCloud1"></div>
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header"><strong>Topics</strong></div>
+                        <div class="card-header"><strong>🔍 Topics</strong></div>
                         <div class="card-body" id="topics1"></div>
                     </div>
                 </div>
@@ -505,13 +453,13 @@ function compareTexts() {
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header"><strong>Top 50 Words</strong></div>
+                        <div class="card-header"><strong>☁️ Top 50 Words</strong></div>
                         <div class="card-body">
                             <div id="wordCloud2"></div>
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header"><strong>Topics</strong></div>
+                        <div class="card-header"><strong>🔍 Topics</strong></div>
                         <div class="card-body" id="topics2"></div>
                     </div>
                 </div>
@@ -521,7 +469,7 @@ function compareTexts() {
 
     document.getElementById('comparisonDisplay').innerHTML = html;
 
-    // Render visualizations with delay
+    // Render visualizations
     setTimeout(() => {
         renderWordCloud(text1.bag_of_words.word_frequencies, '#wordCloud1');
         renderWordCloud(text2.bag_of_words.word_frequencies, '#wordCloud2');

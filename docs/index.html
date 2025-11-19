@@ -118,6 +118,123 @@
             font-weight: 600;
             margin-bottom: 10px;
         }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+        }
+
+        .metric-row {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            transition: background 0.3s ease;
+        }
+
+        .metric-row:hover {
+            background: #f8f9fa;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1rem;
+        }
+
+        .metric-value {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .select-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .select-section label {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .form-select {
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            font-weight: 600;
+            padding: 12px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            font-weight: 600;
+            padding: 12px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .topic-badge {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 6px;
+            color: white;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .topic-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+        }
+
+        .comparison-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        #wordCloud, #wordCloud1, #wordCloud2 {
+            min-height: 450px;
+        }
+
     </style>
 </head>
 <body>
