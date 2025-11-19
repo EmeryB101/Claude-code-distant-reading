@@ -350,43 +350,17 @@ function renderWordCloud(wordFrequencies, title) {
     console.log('Word frequencies received:', wordFrequencies);
     console.log('Total words:', Object.keys(wordFrequencies).length);
 
-    // Get top 100 words for a full, vibrant cloud
+    // Get top 80 words for display
     const topWords = Object.entries(wordFrequencies)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 100);
+        .slice(0, 80);
 
     console.log('Top 10 words:', topWords.slice(0, 10));
 
     if (topWords.length === 0) {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = '20px Georgia';
-        ctx.fillStyle = '#2c3e50';
-        ctx.fillText('No words to display', 50, 100);
         wordList.innerHTML = '<p>No words available</p>';
         return;
     }
-
-    // Clear previous word cloud
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Set canvas dimensions first, before any rendering
-    const containerWidth = canvas.parentElement ? canvas.parentElement.offsetWidth : 800;
-    const finalWidth = containerWidth > 0 ? containerWidth : 800;
-    const finalHeight = 600;
-
-    canvas.width = finalWidth * 2; // High resolution
-    canvas.height = finalHeight * 2;
-    canvas.style.width = finalWidth + 'px';
-    canvas.style.height = finalHeight + 'px';
-
-    console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}`);
-
-    // Create word list with actual frequencies (not scaled)
-    const wordData = topWords.map(([word, freq]) => [word, freq]);
-
-    console.log('Word data prepared:', wordData.length, 'words');
 
     // Vibrant color palette
     const vibrantColors = [
@@ -398,74 +372,46 @@ function renderWordCloud(wordFrequencies, title) {
         '#D35400', '#8E44AD', '#2980B9', '#27AE60', '#C0392B'
     ];
 
-    // Generate word cloud with improved settings
-    if (typeof WordCloud !== 'undefined') {
-        try {
-            console.log('Starting WordCloud generation...');
+    // Calculate sizes
+    const maxFreq = topWords[0][1];
+    const minFreq = topWords[topWords.length - 1][1];
+    const range = maxFreq - minFreq;
 
-            WordCloud(canvas, {
-                list: wordData,
-                gridSize: 8,
-                weightFactor: function(size) {
-                    // Dynamic weight factor based on frequency
-                    const maxFreq = topWords[0][1];
-                    const minFreq = topWords[topWords.length - 1][1];
-                    const range = maxFreq - minFreq;
+    // Create HTML-based colorful word cloud (always visible as primary display)
+    canvas.style.display = 'none';  // Hide canvas, use HTML version
+    wordList.innerHTML = '<div class="html-word-cloud"></div>';
+    const cloudContainer = wordList.querySelector('.html-word-cloud');
 
-                    if (range === 0) return 50;
+    topWords.forEach(([word, freq], index) => {
+        const wordSpan = document.createElement('span');
+        wordSpan.className = 'cloud-word';
+        wordSpan.textContent = word;
 
-                    // Scale font size between 12 and 80 pixels
-                    const normalized = (size - minFreq) / range;
-                    const scaled = Math.pow(normalized, 0.6); // Gentle curve
-                    return 12 + (scaled * 68);
-                },
-                fontFamily: 'Georgia, serif',
-                fontWeight: 'bold',
-                color: function() {
-                    return vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
-                },
-                rotateRatio: 0.3,
-                rotationSteps: 2,
-                backgroundColor: 'transparent',
-                minSize: 12,
-                drawOutOfBound: false,
-                shrinkToFit: true,
-                gridSize: 6,
-                shape: 'circle',
-                ellipticity: 0.65,
-                wait: 5,
-                abortThreshold: 15000,
-                abort: function() {
-                    console.warn('Word cloud generation took too long, aborting...');
-                },
-                drawMask: false,
-                clearCanvas: true,
-                shuffle: true,
-                classes: undefined
-            });
-
-            console.log('WordCloud generation completed');
-        } catch (error) {
-            console.error('Error generating word cloud:', error);
-            ctx.fillStyle = '#e74c3c';
-            ctx.font = '20px Georgia';
-            ctx.fillText('Error generating word cloud. Check console for details.', 10, 30);
+        // Calculate font size
+        let fontSize;
+        if (range === 0) {
+            fontSize = 24;
+        } else {
+            const normalized = (freq - minFreq) / range;
+            const scaled = Math.pow(normalized, 0.5);
+            fontSize = 14 + (scaled * 46); // 14px to 60px
         }
-    } else {
-        console.error('WordCloud library not loaded');
-        ctx.fillStyle = '#e74c3c';
-        ctx.font = '20px Georgia';
-        ctx.fillText('Word cloud library not loaded. Please refresh the page.', 10, 30);
-    }
 
-    // Render word list with top 50 words
-    wordList.innerHTML = '<h4 style="margin-bottom: 1rem;">Top 50 Words</h4>';
-    topWords.forEach(([word, freq]) => {
-        const div = document.createElement('div');
-        div.className = 'word-item';
-        div.innerHTML = '<span class="word">' + word + '</span><span class="freq">' + freq + '</span>';
-        wordList.appendChild(div);
+        // Random color from palette
+        const color = vibrantColors[index % vibrantColors.length];
+
+        // Random slight rotation
+        const rotation = (Math.random() - 0.5) * 20; // -10 to +10 degrees
+
+        wordSpan.style.fontSize = fontSize + 'px';
+        wordSpan.style.color = color;
+        wordSpan.style.transform = `rotate(${rotation}deg)`;
+        wordSpan.title = `${word}: ${freq} occurrences`;
+
+        cloudContainer.appendChild(wordSpan);
     });
+
+    console.log('HTML word cloud rendered with', topWords.length, 'words');
 }
 
 // Render sentiment tab
@@ -688,35 +634,15 @@ function renderComparisonWordCloud(wordFrequencies, title, canvasId) {
 
     console.log(`Rendering comparison word cloud: ${title} on ${canvasId}`);
 
-    // Get top 80 words
+    // Get top 60 words for comparison clouds
     const topWords = Object.entries(wordFrequencies)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 80);
+        .slice(0, 60);
 
     if (topWords.length === 0) {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = '20px Georgia';
-        ctx.fillStyle = '#2c3e50';
-        ctx.fillText('No words to display', 50, 100);
+        canvas.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">No words to display</p>';
         return;
     }
-
-    // Clear and set canvas dimensions
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const containerWidth = canvas.parentElement ? canvas.parentElement.offsetWidth : 600;
-    const finalWidth = containerWidth > 0 ? containerWidth - 40 : 560;
-    const finalHeight = 400;
-
-    canvas.width = finalWidth * 2;
-    canvas.height = finalHeight * 2;
-    canvas.style.width = finalWidth + 'px';
-    canvas.style.height = finalHeight + 'px';
-
-    // Word data
-    const wordData = topWords.map(([word, freq]) => [word, freq]);
 
     // Vibrant colors
     const vibrantColors = [
@@ -728,45 +654,50 @@ function renderComparisonWordCloud(wordFrequencies, title, canvasId) {
         '#D35400', '#8E44AD', '#2980B9', '#27AE60', '#C0392B'
     ];
 
-    if (typeof WordCloud !== 'undefined') {
-        try {
-            WordCloud(canvas, {
-                list: wordData,
-                gridSize: 6,
-                weightFactor: function(size) {
-                    const maxFreq = topWords[0][1];
-                    const minFreq = topWords[topWords.length - 1][1];
-                    const range = maxFreq - minFreq;
+    // Calculate sizes
+    const maxFreq = topWords[0][1];
+    const minFreq = topWords[topWords.length - 1][1];
+    const range = maxFreq - minFreq;
 
-                    if (range === 0) return 40;
+    // Replace canvas with HTML word cloud
+    const cloudDiv = document.createElement('div');
+    cloudDiv.className = 'html-word-cloud';
+    cloudDiv.style.minHeight = '400px';
 
-                    const normalized = (size - minFreq) / range;
-                    const scaled = Math.pow(normalized, 0.6);
-                    return 10 + (scaled * 60);
-                },
-                fontFamily: 'Georgia, serif',
-                fontWeight: 'bold',
-                color: function() {
-                    return vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
-                },
-                rotateRatio: 0.3,
-                rotationSteps: 2,
-                backgroundColor: 'transparent',
-                minSize: 10,
-                drawOutOfBound: false,
-                shrinkToFit: true,
-                shape: 'circle',
-                ellipticity: 0.65,
-                wait: 5,
-                abortThreshold: 15000,
-                clearCanvas: true,
-                shuffle: true
-            });
-            console.log('Comparison word cloud rendered:', title);
-        } catch (error) {
-            console.error('Error rendering comparison word cloud:', error);
+    topWords.forEach(([word, freq], index) => {
+        const wordSpan = document.createElement('span');
+        wordSpan.className = 'cloud-word';
+        wordSpan.textContent = word;
+
+        // Calculate font size
+        let fontSize;
+        if (range === 0) {
+            fontSize = 20;
+        } else {
+            const normalized = (freq - minFreq) / range;
+            const scaled = Math.pow(normalized, 0.5);
+            fontSize = 12 + (scaled * 38); // 12px to 50px
         }
-    }
+
+        // Assign color from palette
+        const color = vibrantColors[index % vibrantColors.length];
+
+        // Random slight rotation
+        const rotation = (Math.random() - 0.5) * 20;
+
+        wordSpan.style.fontSize = fontSize + 'px';
+        wordSpan.style.color = color;
+        wordSpan.style.transform = `rotate(${rotation}deg)`;
+        wordSpan.title = `${word}: ${freq} occurrences`;
+
+        cloudDiv.appendChild(wordSpan);
+    });
+
+    // Replace canvas with HTML cloud
+    canvas.parentElement.replaceChild(cloudDiv, canvas);
+    cloudDiv.id = canvasId;
+
+    console.log('Comparison HTML word cloud rendered:', title, 'with', topWords.length, 'words');
 }
 
 // Initialize on page load
