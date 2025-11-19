@@ -147,113 +147,102 @@ function displayText() {
 }
 
 function renderWordCloud(wordFrequencies, selector) {
-    console.log('=== RENDERING WORD CLOUD ===');
+    console.log('========================================');
+    console.log('WORD CLOUD FUNCTION CALLED');
+    console.log('Selector:', selector);
+    console.log('Word frequencies object:', Object.keys(wordFrequencies).length, 'words');
     
-    // Clear previous
+    // Get container
     const container = document.querySelector(selector);
+    console.log('Container found:', container ? 'YES' : 'NO');
+    
     if (!container) {
-        console.error('Container not found:', selector);
+        console.error('CRITICAL ERROR: Container not found for', selector);
         return;
     }
     
+    // Clear any existing content
     container.innerHTML = '';
+    console.log('Container cleared');
     
     // Get top 50 words
-    const words = Object.entries(wordFrequencies)
-        .slice(0, 50)
-        .map(([word, freq]) => ({ text: word, size: freq }));
+    const wordEntries = Object.entries(wordFrequencies);
+    console.log('Total word entries:', wordEntries.length);
     
-    console.log('Rendering', words.length, 'words');
+    const top50 = wordEntries.slice(0, 50);
+    console.log('Top 50 words extracted');
     
-    // Find frequency range
-    const minFreq = Math.min(...words.map(w => w.size));
-    const maxFreq = Math.max(...words.map(w => w.size));
+    if (top50.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: red; font-weight: bold;">ERROR: No words found!</div>';
+        return;
+    }
     
-    console.log('Frequency range:', minFreq, 'to', maxFreq);
+    // Get frequency range
+    const frequencies = top50.map(([word, freq]) => freq);
+    const minFreq = Math.min(...frequencies);
+    const maxFreq = Math.max(...frequencies);
     
-    // Create wrapper div
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = `
-        display: grid;
-        grid-template-columns: repeat(10, 1fr);
-        gap: 8px;
-        padding: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        min-height: 400px;
-    `;
+    console.log('Min frequency:', minFreq);
+    console.log('Max frequency:', maxFreq);
     
-    // Vibrant color palette
-    const colors = [
-        '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
-        '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739',
-        '#52B3D9', '#EC7063', '#5DADE2', '#48C9B0', '#F39C12'
-    ];
+    // Create container HTML
+    let html = '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">';
     
-    // Create each word
-    words.forEach((word, index) => {
-        // Calculate font size (8-14px range)
-        const normalized = (word.size - minFreq) / (maxFreq - minFreq || 1);
-        const fontSize = 8 + (normalized * 6); // 8-14px
+    // Add header
+    html += '<div style="background: rgba(0,0,0,0.3); color: white; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px;">Top 50 Most Common Words</div>';
+    
+    // Create grid
+    html += '<div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px;">';
+    
+    // Colors
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B3D9', '#EC7063', '#5DADE2', '#48C9B0', '#F39C12', '#AF7AC5'];
+    
+    // Add each word
+    top50.forEach(([word, freq], index) => {
+        // Calculate font size (very small: 8-14px)
+        const normalized = maxFreq === minFreq ? 0.5 : (freq - minFreq) / (maxFreq - minFreq);
+        const fontSize = 8 + (normalized * 6);
+        const color = colors[index % colors.length];
         
-        const wordDiv = document.createElement('div');
-        wordDiv.style.cssText = `
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 4px;
-            border-radius: 8px;
-            font-size: ${fontSize}px;
-            font-weight: bold;
-            color: ${colors[index % colors.length]};
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            word-break: break-word;
-            min-height: 40px;
-        `;
-        
-        wordDiv.textContent = word.text;
-        wordDiv.title = `${word.text}: ${word.size} occurrences`;
-        
-        // Hover effect
-        wordDiv.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-            this.style.zIndex = '10';
-        });
-        
-        wordDiv.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-            this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            this.style.zIndex = '1';
-        });
-        
-        wrapper.appendChild(wordDiv);
+        html += `
+            <div style="
+                background: white;
+                padding: 10px 5px;
+                border-radius: 8px;
+                text-align: center;
+                font-size: ${fontSize}px;
+                font-weight: bold;
+                color: ${color};
+                min-height: 45px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+                cursor: pointer;
+                transition: transform 0.2s;
+                word-wrap: break-word;
+                overflow: hidden;
+            " 
+            title="${word}: ${freq} occurrences"
+            onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.25)';"
+            onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.15)';">
+                ${word}
+            </div>`;
     });
     
-    // Add title
-    const title = document.createElement('div');
-    title.style.cssText = `
-        grid-column: 1 / -1;
-        text-align: center;
-        font-size: 18px;
-        font-weight: bold;
-        color: white;
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
-        margin-bottom: 10px;
-    `;
-    title.textContent = `Top 50 Words (${words.length} displayed)`;
-    wrapper.insertBefore(title, wrapper.firstChild);
+    html += '</div>'; // Close grid
     
-    container.appendChild(wrapper);
+    // Add footer
+    html += `<div style="color: white; text-align: center; margin-top: 15px; font-size: 14px; font-weight: bold;">${top50.length} words displayed | Sized by frequency</div>`;
     
-    console.log('✓ Word cloud rendered with', words.length, 'words');
+    html += '</div>'; // Close container
+    
+    // Insert HTML
+    container.innerHTML = html;
+    
+    console.log('✓ Word cloud HTML inserted');
+    console.log('✓ Total words rendered:', top50.length);
+    console.log('========================================');
 }
 
 function renderStyleChart(style, selector) {
