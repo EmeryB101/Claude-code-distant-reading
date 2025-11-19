@@ -105,6 +105,93 @@ function setupEventListeners() {
     document.getElementById('compare-btn').addEventListener('click', showCompareView);
 }
 
+// Thematic word categories
+const THEME_CATEGORIES = {
+    nature: ['flower', 'flowers', 'bird', 'birds', 'tree', 'trees', 'sun', 'moon', 'star', 'stars',
+             'sea', 'ocean', 'sky', 'wind', 'rain', 'snow', 'rose', 'garden', 'leaf', 'spring',
+             'summer', 'winter', 'autumn', 'bee', 'grass', 'earth', 'nature', 'dew', 'air'],
+    emotion: ['love', 'heart', 'joy', 'pain', 'sorrow', 'tears', 'smile', 'hope', 'fear', 'grief',
+              'delight', 'despair', 'passion', 'tender', 'gentle', 'sweet', 'dear', 'beloved',
+              'weary', 'calm', 'peace'],
+    time: ['day', 'night', 'time', 'year', 'years', 'hour', 'hours', 'moment', 'morning', 'evening',
+           'noon', 'past', 'future', 'forever', 'never', 'always', 'yesterday', 'tomorrow', 'long',
+           'old', 'new', 'last', 'first'],
+    spirituality: ['god', 'heaven', 'soul', 'spirit', 'angel', 'prayer', 'death', 'life', 'immortality',
+                   'eternity', 'divine', 'holy', 'blessed', 'faith', 'grace'],
+    human: ['eye', 'eyes', 'hand', 'hands', 'face', 'heart', 'head', 'voice', 'word', 'words',
+            'thought', 'mind', 'lips', 'feet', 'blood', 'breath'],
+    abstract: ['dream', 'truth', 'light', 'dark', 'shadow', 'silence', 'mystery', 'wonder',
+               'beauty', 'power', 'glory', 'fame', 'pride']
+};
+
+// Analyze themes from author's word frequencies
+function analyzeAuthorThemes(wordFrequencies) {
+    const themes = {};
+
+    for (const [category, keywords] of Object.entries(THEME_CATEGORIES)) {
+        themes[category] = [];
+
+        for (const [word, freq] of Object.entries(wordFrequencies)) {
+            if (keywords.includes(word.toLowerCase())) {
+                themes[category].push({ word, freq });
+            }
+        }
+
+        // Sort by frequency
+        themes[category].sort((a, b) => b.freq - a.freq);
+    }
+
+    return themes;
+}
+
+// Render theme comparison
+function renderThemeComparison() {
+    const overviewView = document.getElementById('overview-view');
+
+    // Check if already rendered
+    if (document.getElementById('theme-comparison')) {
+        return;
+    }
+
+    let themeHtml = '<div id="theme-comparison">';
+    themeHtml += '<h3>🎨 Thematic Analysis: Author Comparison</h3>';
+    themeHtml += '<p style="color: #f57c00; margin-bottom: 1rem;">Exploring recurring themes and patterns in each author\'s vocabulary</p>';
+    themeHtml += '<div class="theme-grid">';
+
+    // Analyze each author
+    Object.keys(analysisData.authors).forEach(authorKey => {
+        if (authorKey === 'unknown') return;
+
+        const author = analysisData.authors[authorKey];
+        const themes = analyzeAuthorThemes(author.word_frequencies);
+
+        themeHtml += '<div class="author-theme-card">';
+        themeHtml += '<h4>' + author.metadata.author + '</h4>';
+
+        // Display each theme category
+        for (const [category, words] of Object.entries(themes)) {
+            if (words.length > 0) {
+                const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+                themeHtml += '<div class="theme-category">';
+                themeHtml += '<h5>' + categoryName + '</h5>';
+                themeHtml += '<div class="theme-words">';
+
+                words.slice(0, 8).forEach(item => {
+                    themeHtml += '<span class="theme-word">' + item.word + ' <span class="count">(' + item.freq + ')</span></span>';
+                });
+
+                themeHtml += '</div></div>';
+            }
+        }
+
+        themeHtml += '</div>';
+    });
+
+    themeHtml += '</div></div>';
+
+    overviewView.insertAdjacentHTML('beforeend', themeHtml);
+}
+
 // Show overview
 function renderOverview() {
     const overviewStats = document.querySelector('.overview-stats');
@@ -131,6 +218,9 @@ function renderOverview() {
             '<p><span class="stat-value">' + totalWords.toLocaleString() + '</span></p>' +
             '<p style="font-size: 0.85rem; color: #7f8c8d;">Across all texts (excluding stopwords)</p>' +
         '</div>';
+
+    // Add theme comparison after a brief delay for animation
+    setTimeout(renderThemeComparison, 300);
 }
 
 // Show text view
