@@ -534,6 +534,44 @@ canvas#sentiment-chart, canvas#pos-chart {
     margin-top: 1.5rem;
 }
 
+.comparison-wordcloud-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .comparison-wordcloud-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.comparison-wordcloud-item {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border: 3px solid #5c6bc0;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comparison-wordcloud-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.comparison-wordcloud-item h4 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #1e3c72;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 2px solid #5c6bc0;
+    padding-bottom: 0.75rem;
+}
+
 .comparison-item {
     background-color: #ffffff;
     padding: 1.5rem;
