@@ -341,26 +341,55 @@ function renderWordCloud(wordFrequencies, title) {
     const canvas = document.getElementById('wordcloud-canvas');
     const wordList = document.getElementById('word-list');
 
-    // Prepare data for word cloud
-    const wordData = Object.entries(wordFrequencies).map(([word, freq]) => [word, freq * 3]);
+    // Get top 50 words for better visibility
+    const topWords = Object.entries(wordFrequencies).slice(0, 50);
+
+    // Find max frequency for scaling
+    const maxFreq = Math.max(...topWords.map(([, freq]) => freq));
+    const minFreq = Math.min(...topWords.map(([, freq]) => freq));
+
+    // Better scaling: normalize frequencies and apply power scaling for better visual distribution
+    const wordData = topWords.map(([word, freq]) => {
+        // Normalize to 0-1 range, then apply power scaling, then scale to good font size range
+        const normalized = (freq - minFreq) / (maxFreq - minFreq);
+        const scaled = Math.pow(normalized, 0.7); // Power scaling makes distribution more even
+        const size = 20 + (scaled * 80); // Font size range: 20-100
+        return [word, size];
+    });
 
     // Clear previous word cloud
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Generate word cloud
+    // Set canvas size for better resolution
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = 500 * 2;
+    canvas.style.width = canvas.offsetWidth + 'px';
+    canvas.style.height = '500px';
+
+    // Generate word cloud with improved settings
     if (typeof WordCloud !== 'undefined') {
         WordCloud(canvas, {
             list: wordData,
-            gridSize: 8,
-            weightFactor: 3,
+            gridSize: 12,
+            weightFactor: 1,
             fontFamily: 'Georgia, serif',
+            fontWeight: '600',
             color: () => {
-                const colors = ['#34495e', '#2c3e50', '#3498db', '#2980b9', '#16a085', '#27ae60'];
+                const colors = [
+                    '#1e3c72', '#2a5298', '#667eea', '#764ba2',
+                    '#5c6bc0', '#3f51b5', '#2196f3', '#1565c0',
+                    '#00897b', '#43a047', '#f57c00', '#e65100'
+                ];
                 return colors[Math.floor(Math.random() * colors.length)];
             },
-            rotateRatio: 0.3,
-            backgroundColor: '#ffffff'
+            rotateRatio: 0.2,
+            rotationSteps: 2,
+            backgroundColor: '#ffffff',
+            minSize: 20,
+            drawOutOfBound: false,
+            shrinkToFit: true,
+            shape: 'square'
         });
     } else {
         ctx.font = '20px Georgia';
@@ -368,9 +397,9 @@ function renderWordCloud(wordFrequencies, title) {
         ctx.fillText('Word cloud library not loaded', 50, 100);
     }
 
-    // Render word list
-    wordList.innerHTML = '<h4 style="margin-bottom: 1rem;">Top Words</h4>';
-    Object.entries(wordFrequencies).slice(0, 50).forEach(([word, freq]) => {
+    // Render word list with top 50 words
+    wordList.innerHTML = '<h4 style="margin-bottom: 1rem;">Top 50 Words</h4>';
+    topWords.forEach(([word, freq]) => {
         const div = document.createElement('div');
         div.className = 'word-item';
         div.innerHTML = '<span class="word">' + word + '</span><span class="freq">' + freq + '</span>';
