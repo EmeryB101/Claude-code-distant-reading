@@ -1,704 +1,395 @@
-// Analysis data (loaded from embedded data or fetch)
+// Load data and initialize
 let analysisData = null;
 
-// Load data
-async function loadData() {
-    try {
-        // Try to use embedded data first
-        if (typeof EMBEDDED_DATA !== 'undefined') {
-            analysisData = EMBEDDED_DATA;
-            initializeApp();
-        } else {
-            // Fallback to fetching JSON file
-            const response = await fetch('../results/analysis.json');
-            analysisData = await response.json();
-            initializeApp();
-        }
-    } catch (error) {
-        console.error('Error loading data:', error);
-        // Show error message to user
-        document.querySelector('.content-area').innerHTML =
-            '<div style="padding: 2rem; color: #e74c3c;"><h2>Error Loading Data</h2><p>Could not load analysis data. Please ensure data-embed.js is included or analysis.json exists.</p></div>';
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof EMBEDDED_DATA !== 'undefined') {
+        analysisData = EMBEDDED_DATA;
+        initializeApp();
+    } else {
+        console.error('Data not loaded');
     }
-}
+});
 
-// Initialize the application
 function initializeApp() {
-    renderNavigation();
-    renderOverview();
-    setupEventListeners();
-}
-
-// Render navigation lists
-function renderNavigation() {
-    const textList = document.getElementById('text-list');
-    const authorList = document.getElementById('author-list');
-
-    // Filter out the "Unknown" entry (requirements.txt)
+    // Filter out Unknown texts
     const texts = analysisData.texts.filter(t => t.metadata.author !== 'Unknown');
 
-    // Render text list
-    texts.forEach(text => {
-        const li = document.createElement('li');
-        const button = document.createElement('button');
-        button.textContent = text.metadata.title;
-        button.dataset.textId = text.metadata.id;
-        button.addEventListener('click', () => showTextView(text.metadata.id));
-        li.appendChild(button);
-        textList.appendChild(li);
-    });
-
-    // Render author list
-    Object.keys(analysisData.authors).forEach(authorKey => {
-        const author = analysisData.authors[authorKey];
-        if (authorKey === 'unknown') return; // Skip unknown
-
-        const li = document.createElement('li');
-        const button = document.createElement('button');
-        button.textContent = author.metadata.author;
-        button.dataset.authorKey = authorKey;
-        button.addEventListener('click', () => showAuthorView(authorKey));
-        li.appendChild(button);
-        authorList.appendChild(li);
-    });
-
-    // Add comparison checkboxes
-    renderComparisonCheckboxes();
-}
-
-// Render comparison checkboxes
-function renderComparisonCheckboxes() {
-    const compareSelections = document.getElementById('compare-selections');
-    const texts = analysisData.texts.filter(t => t.metadata.author !== 'Unknown');
-
-    compareSelections.innerHTML = '<p style="margin: 0.5rem 0; font-weight: 600;">Select texts:</p>';
+    // Populate dropdowns
+    const textSelect = document.getElementById('textSelect');
+    const text1Select = document.getElementById('text1Select');
+    const text2Select = document.getElementById('text2Select');
 
     texts.forEach(text => {
-        const label = document.createElement('label');
-        label.style.display = 'block';
-        label.style.marginBottom = '0.3rem';
-        label.style.fontSize = '0.85rem';
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = text.metadata.id;
-        checkbox.dataset.title = text.metadata.title;
-
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(' ' + text.metadata.title.substring(0, 30) + '...'));
-
-        compareSelections.appendChild(label);
+        const option = new Option(text.metadata.title, text.metadata.id);
+        textSelect.add(option.cloneNode(true));
+        text1Select.add(option.cloneNode(true));
+        text2Select.add(option.cloneNode(true));
     });
 }
 
-// Setup event listeners
-function setupEventListeners() {
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            const tabName = e.target.dataset.tab;
-            switchTab(tabName);
-        });
-    });
+function switchMode(mode) {
+    const singleView = document.getElementById('singleView');
+    const compareView = document.getElementById('compareView');
+    const singleBtn = document.getElementById('singleViewBtn');
+    const compareBtn = document.getElementById('compareViewBtn');
 
-    // Compare button
-    document.getElementById('compare-btn').addEventListener('click', showCompareView);
-}
-
-// Thematic word categories
-const THEME_CATEGORIES = {
-    nature: ['flower', 'flowers', 'bird', 'birds', 'tree', 'trees', 'sun', 'moon', 'star', 'stars',
-             'sea', 'ocean', 'sky', 'wind', 'rain', 'snow', 'rose', 'garden', 'leaf', 'spring',
-             'summer', 'winter', 'autumn', 'bee', 'grass', 'earth', 'nature', 'dew', 'air'],
-    emotion: ['love', 'heart', 'joy', 'pain', 'sorrow', 'tears', 'smile', 'hope', 'fear', 'grief',
-              'delight', 'despair', 'passion', 'tender', 'gentle', 'sweet', 'dear', 'beloved',
-              'weary', 'calm', 'peace'],
-    time: ['day', 'night', 'time', 'year', 'years', 'hour', 'hours', 'moment', 'morning', 'evening',
-           'noon', 'past', 'future', 'forever', 'never', 'always', 'yesterday', 'tomorrow', 'long',
-           'old', 'new', 'last', 'first'],
-    spirituality: ['god', 'heaven', 'soul', 'spirit', 'angel', 'prayer', 'death', 'life', 'immortality',
-                   'eternity', 'divine', 'holy', 'blessed', 'faith', 'grace'],
-    human: ['eye', 'eyes', 'hand', 'hands', 'face', 'heart', 'head', 'voice', 'word', 'words',
-            'thought', 'mind', 'lips', 'feet', 'blood', 'breath'],
-    abstract: ['dream', 'truth', 'light', 'dark', 'shadow', 'silence', 'mystery', 'wonder',
-               'beauty', 'power', 'glory', 'fame', 'pride']
-};
-
-// Analyze themes from author's word frequencies
-function analyzeAuthorThemes(wordFrequencies) {
-    const themes = {};
-
-    for (const [category, keywords] of Object.entries(THEME_CATEGORIES)) {
-        themes[category] = [];
-
-        for (const [word, freq] of Object.entries(wordFrequencies)) {
-            if (keywords.includes(word.toLowerCase())) {
-                themes[category].push({ word, freq });
-            }
-        }
-
-        // Sort by frequency
-        themes[category].sort((a, b) => b.freq - a.freq);
+    if (mode === 'single') {
+        singleView.style.display = 'block';
+        compareView.style.display = 'none';
+        singleBtn.classList.add('btn-primary');
+        singleBtn.classList.remove('btn-outline-primary');
+        compareBtn.classList.remove('btn-primary');
+        compareBtn.classList.add('btn-outline-primary');
+    } else {
+        singleView.style.display = 'none';
+        compareView.style.display = 'block';
+        singleBtn.classList.remove('btn-primary');
+        singleBtn.classList.add('btn-outline-primary');
+        compareBtn.classList.add('btn-primary');
+        compareBtn.classList.remove('btn-outline-primary');
     }
-
-    return themes;
 }
 
-// Render theme comparison
-function renderThemeComparison() {
-    const overviewView = document.getElementById('overview-view');
-
-    // Check if already rendered
-    if (document.getElementById('theme-comparison')) {
+function displayText() {
+    const textId = document.getElementById('textSelect').value;
+    if (!textId) {
+        document.getElementById('textDisplay').innerHTML = '';
         return;
     }
 
-    let themeHtml = '<div id="theme-comparison">';
-    themeHtml += '<h3>🎨 Thematic Analysis: Author Comparison</h3>';
-    themeHtml += '<p style="color: #f57c00; margin-bottom: 1rem;">Exploring recurring themes and patterns in each author\'s vocabulary</p>';
-    themeHtml += '<div class="theme-grid">';
-
-    // Analyze each author
-    Object.keys(analysisData.authors).forEach(authorKey => {
-        if (authorKey === 'unknown') return;
-
-        const author = analysisData.authors[authorKey];
-        const themes = analyzeAuthorThemes(author.word_frequencies);
-
-        themeHtml += '<div class="author-theme-card">';
-        themeHtml += '<h4>' + author.metadata.author + '</h4>';
-
-        // Display each theme category
-        for (const [category, words] of Object.entries(themes)) {
-            if (words.length > 0) {
-                const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
-                themeHtml += '<div class="theme-category">';
-                themeHtml += '<h5>' + categoryName + '</h5>';
-                themeHtml += '<div class="theme-words">';
-
-                words.slice(0, 8).forEach(item => {
-                    themeHtml += '<span class="theme-word">' + item.word + ' <span class="count">(' + item.freq + ')</span></span>';
-                });
-
-                themeHtml += '</div></div>';
-            }
-        }
-
-        themeHtml += '</div>';
-    });
-
-    themeHtml += '</div></div>';
-
-    overviewView.insertAdjacentHTML('beforeend', themeHtml);
-}
-
-// Show overview
-function renderOverview() {
-    const overviewStats = document.querySelector('.overview-stats');
-    const texts = analysisData.texts.filter(t => t.metadata.author !== 'Unknown');
-
-    const totalWords = texts.reduce((sum, t) => sum + t.bag_of_words.total_words, 0);
-    const authorsHtml = analysisData.summary.authors
-        .filter(a => a.key !== 'unknown')
-        .map(a => '<p>' + a.name + ': <span class="stat-value">' + a.text_count + ' texts</span></p>')
-        .join('');
-
-    overviewStats.innerHTML =
-        '<div class="stat-card">' +
-            '<h3>Corpus</h3>' +
-            '<p><span class="stat-value">' + analysisData.corpus_name + '</span></p>' +
-            '<p>Total texts: <span class="stat-value">' + texts.length + '</span></p>' +
-        '</div>' +
-        '<div class="stat-card">' +
-            '<h3>Authors</h3>' +
-            authorsHtml +
-        '</div>' +
-        '<div class="stat-card">' +
-            '<h3>Total Words</h3>' +
-            '<p><span class="stat-value">' + totalWords.toLocaleString() + '</span></p>' +
-            '<p style="font-size: 0.85rem; color: #7f8c8d;">Across all texts (excluding stopwords)</p>' +
-        '</div>';
-
-    // Add theme comparison after a brief delay for animation
-    setTimeout(renderThemeComparison, 300);
-}
-
-// Show text view
-function showTextView(textId) {
     const text = analysisData.texts.find(t => t.metadata.id === textId);
     if (!text) return;
 
-    // Switch to text view
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('text-view').classList.add('active');
+    const html = `
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Metadata</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="metric-row">
+                            <span class="metric-label">Title:</span>
+                            <span class="metric-value">${text.metadata.title}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Author:</span>
+                            <span class="metric-value">${text.metadata.author}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Total Words:</span>
+                            <span class="metric-value">${text.bag_of_words.total_words.toLocaleString()}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Unique Words:</span>
+                            <span class="metric-value">${text.bag_of_words.unique_words.toLocaleString()}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Lexical Diversity:</span>
+                            <span class="metric-value">${text.vocabulary_richness.lexical_diversity}</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Sentiment (Compound):</span>
+                            <span class="metric-value">${text.sentiment.overall.compound}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // Update title
-    document.getElementById('text-title').textContent = text.metadata.title;
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Top 50 Words</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="wordCloud"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // Highlight active nav item
-    document.querySelectorAll('.nav-list button').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-text-id="' + textId + '"]').classList.add('active');
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Style Analysis (Parts of Speech)</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="styleChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // Show metadata tab by default
-    switchTab('metadata');
-    renderMetadata(text);
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Topics</h4>
+                    </div>
+                    <div class="card-body" id="topicsDisplay">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('textDisplay').innerHTML = html;
+
+    // Render visualizations
+    renderWordCloud(text.bag_of_words.word_frequencies, '#wordCloud');
+    renderStyleChart(text.style, '#styleChart');
+    renderTopics(text.topics, '#topicsDisplay');
 }
 
-// Show author view
-function showAuthorView(authorKey) {
-    const author = analysisData.authors[authorKey];
-    if (!author) return;
+function renderWordCloud(wordFrequencies, selector) {
+    // Clear previous
+    d3.select(selector).selectAll('*').remove();
 
-    // Switch to text view (reuse for author)
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('text-view').classList.add('active');
+    // Get top 50 words
+    const words = Object.entries(wordFrequencies).map(([word, freq]) => ({
+        text: word,
+        size: freq
+    }));
 
-    // Update title
-    document.getElementById('text-title').textContent = author.metadata.author + ' (Aggregate)';
+    // Set up dimensions
+    const width = document.querySelector(selector).offsetWidth;
+    const height = 400;
 
-    // Highlight active nav item
-    document.querySelectorAll('.nav-list button').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-author-key="' + authorKey + '"]').classList.add('active');
+    // Create SVG
+    const svg = d3.select(selector)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
 
-    // Show metadata tab with author aggregate data
-    switchTab('metadata');
-    renderAuthorMetadata(author);
+    // Color scale
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    // Show word cloud tab with author data
-    document.querySelector('[data-tab="wordcloud"]').addEventListener('click', () => {
-        renderWordCloud(author.word_frequencies, author.metadata.author);
-    }, { once: true });
+    // Find min/max frequencies
+    const minFreq = d3.min(words, d => d.size);
+    const maxFreq = d3.max(words, d => d.size);
+
+    // Font size scale
+    const fontSize = d3.scalePow()
+        .exponent(0.5)
+        .domain([minFreq, maxFreq])
+        .range([16, 60]);
+
+    // Simple scatter layout for word cloud
+    words.forEach((word, i) => {
+        const angle = (i / words.length) * 2 * Math.PI;
+        const radius = 50 + Math.random() * 150;
+        word.x = width/2 + Math.cos(angle) * radius;
+        word.y = height/2 + Math.sin(angle) * radius;
+    });
+
+    // Render words
+    svg.selectAll('text')
+        .data(words)
+        .enter()
+        .append('text')
+        .attr('class', 'word-cloud-word')
+        .attr('x', d => d.x)
+        .attr('y', d => d.y)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', d => fontSize(d.size) + 'px')
+        .attr('font-weight', 'bold')
+        .attr('fill', (d, i) => color(i))
+        .text(d => d.text)
+        .append('title')
+        .text(d => `${d.text}: ${d.size}`);
 }
 
-// Render metadata
-function renderMetadata(text) {
-    const content = document.getElementById('metadata-content');
-    const vocab = text.vocabulary_richness;
-    const bow = text.bag_of_words;
+function renderStyleChart(style, selector) {
+    // Clear previous
+    d3.select(selector).selectAll('*').remove();
 
-    content.innerHTML =
-        '<h3>' + text.metadata.title + '</h3>' +
-        '<p><strong>Author:</strong> ' + text.metadata.author + '</p>' +
-        '<p><strong>Text ID:</strong> ' + text.metadata.id + '</p>' +
-        '<h4 style="margin-top: 1.5rem;">Word Statistics</h4>' +
-        '<p><strong>Total Words:</strong> ' + bow.total_words.toLocaleString() + '</p>' +
-        '<p><strong>Unique Words:</strong> ' + bow.unique_words.toLocaleString() + '</p>' +
-        '<p><strong>Type-Token Ratio:</strong> ' + vocab.type_token_ratio + '</p>' +
-        '<p><strong>Hapax Legomena:</strong> ' + vocab.hapax_legomena + ' (' + vocab.hapax_percentage + '%)</p>' +
-        '<p><strong>Yule\'s K:</strong> ' + vocab.yules_k + '</p>' +
-        '<h4 style="margin-top: 1.5rem;">Sentiment (VADER)</h4>' +
-        '<p><strong>Compound:</strong> ' + text.sentiment.overall.compound + '</p>' +
-        '<p><strong>Positive:</strong> ' + text.sentiment.overall.pos + '</p>' +
-        '<p><strong>Negative:</strong> ' + text.sentiment.overall.neg + '</p>' +
-        '<p><strong>Neutral:</strong> ' + text.sentiment.overall.neu + '</p>';
+    // Prepare data
+    const data = Object.entries(style.percentages).map(([key, value]) => ({
+        category: key.charAt(0).toUpperCase() + key.slice(1),
+        percentage: value
+    })).filter(d => d.percentage > 0).sort((a, b) => b.percentage - a.percentage);
 
-    // Setup word cloud rendering when tab is clicked
-    document.querySelector('[data-tab="wordcloud"]').addEventListener('click', () => {
-        renderWordCloud(text.bag_of_words.word_frequencies, text.metadata.title);
-    }, { once: true });
+    // Set up dimensions
+    const margin = {top: 20, right: 30, bottom: 60, left: 60};
+    const width = document.querySelector(selector).offsetWidth - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
 
-    // Setup sentiment chart when tab is clicked
-    document.querySelector('[data-tab="sentiment"]').addEventListener('click', () => {
-        renderSentimentTab(text);
-    }, { once: true });
+    // Create SVG
+    const svg = d3.select(selector)
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Setup style chart when tab is clicked
-    document.querySelector('[data-tab="style"]').addEventListener('click', () => {
-        renderStyleTab(text);
-    }, { once: true });
+    // Scales
+    const x = d3.scaleBand()
+        .range([0, width])
+        .padding(0.1)
+        .domain(data.map(d => d.category));
+
+    const y = d3.scaleLinear()
+        .range([height, 0])
+        .domain([0, d3.max(data, d => d.percentage)]);
+
+    // Color scale
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // Bars
+    svg.selectAll('.bar')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', d => x(d.category))
+        .attr('y', d => y(d.percentage))
+        .attr('width', x.bandwidth())
+        .attr('height', d => height - y(d.percentage))
+        .attr('fill', (d, i) => color(i))
+        .style('opacity', 0.8);
+
+    // X axis
+    svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll('text')
+        .attr('transform', 'rotate(-45)')
+        .style('text-anchor', 'end');
+
+    // Y axis
+    svg.append('g')
+        .call(d3.axisLeft(y).ticks(10));
+
+    // Y axis label
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.left)
+        .attr('x', 0 - (height / 2))
+        .attr('dy', '1em')
+        .style('text-anchor', 'middle')
+        .text('Percentage (%)');
 }
 
-// Render author metadata
-function renderAuthorMetadata(author) {
-    const content = document.getElementById('metadata-content');
-
-    const textsHtml = author.texts.map(textId => {
-        const text = analysisData.texts.find(t => t.metadata.id === textId);
-        return '<li>' + (text ? text.metadata.title : textId) + '</li>';
-    }).join('');
-
-    content.innerHTML =
-        '<h3>' + author.metadata.author + '</h3>' +
-        '<p><strong>Texts Included:</strong> ' + author.texts.length + '</p>' +
-        '<h4 style="margin-top: 1.5rem;">Aggregate Word Statistics</h4>' +
-        '<p><strong>Total Words:</strong> ' + author.total_words.toLocaleString() + '</p>' +
-        '<p><strong>Unique Words:</strong> ' + author.unique_words.toLocaleString() + '</p>' +
-        '<h4 style="margin-top: 1.5rem;">Included Texts</h4>' +
-        '<ul style="margin-left: 1.5rem;">' + textsHtml + '</ul>';
-}
-
-// Switch tab
-function switchTab(tabName) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-
-    document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
-    document.getElementById('tab-' + tabName).classList.add('active');
-}
-
-// Render word cloud
-function renderWordCloud(wordFrequencies, title) {
-    const canvas = document.getElementById('wordcloud-canvas');
-    const wordList = document.getElementById('word-list');
-
-    if (!canvas || !wordList) {
-        console.error('Canvas or word list element not found');
+function renderTopics(topics, selector) {
+    if (!topics.topics || topics.topics.length === 0) {
+        document.getElementById(selector.replace('#', '')).innerHTML = '<p class="text-muted">No topics available</p>';
         return;
     }
 
-    console.log(`Rendering word cloud for: ${title}`);
-    console.log('Word frequencies received:', wordFrequencies);
-    console.log('Total words:', Object.keys(wordFrequencies).length);
-
-    // Get top 10 words for clear, focused display
-    const topWords = Object.entries(wordFrequencies)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
-    console.log('Top 10 words:', topWords);
-
-    if (topWords.length === 0) {
-        wordList.innerHTML = '<p>No words available</p>';
-        return;
-    }
-
-    // Vibrant color palette
-    const vibrantColors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
-        '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B3D9',
-        '#EC7063', '#5DADE2', '#48C9B0', '#F39C12', '#AF7AC5',
-        '#EB984E', '#5499C7', '#45B39D', '#E74C3C', '#3498DB',
-        '#1ABC9C', '#F39C12', '#9B59B6', '#E67E22', '#16A085',
-        '#D35400', '#8E44AD', '#2980B9', '#27AE60', '#C0392B'
-    ];
-
-    // Calculate sizes
-    const maxFreq = topWords[0][1];
-    const minFreq = topWords[topWords.length - 1][1];
-    const range = maxFreq - minFreq;
-
-    // Create HTML-based colorful word cloud (always visible as primary display)
-    canvas.style.display = 'none';  // Hide canvas, use HTML version
-    wordList.innerHTML = '<div class="html-word-cloud"></div>';
-    const cloudContainer = wordList.querySelector('.html-word-cloud');
-
-    topWords.forEach(([word, freq], index) => {
-        const wordSpan = document.createElement('span');
-        wordSpan.className = 'cloud-word';
-        wordSpan.textContent = word;
-
-        // Calculate font size - larger for top 10
-        let fontSize;
-        if (range === 0) {
-            fontSize = 48;
-        } else {
-            const normalized = (freq - minFreq) / range;
-            const scaled = Math.pow(normalized, 0.5);
-            fontSize = 28 + (scaled * 52); // 28px to 80px for better visibility
-        }
-
-        // Random color from palette
-        const color = vibrantColors[index % vibrantColors.length];
-
-        // Random slight rotation
-        const rotation = (Math.random() - 0.5) * 20; // -10 to +10 degrees
-
-        wordSpan.style.fontSize = fontSize + 'px';
-        wordSpan.style.color = color;
-        wordSpan.style.transform = `rotate(${rotation}deg)`;
-        wordSpan.title = `${word}: ${freq} occurrences`;
-
-        cloudContainer.appendChild(wordSpan);
-    });
-
-    console.log('HTML word cloud rendered with', topWords.length, 'words');
-}
-
-// Render sentiment tab
-function renderSentimentTab(text) {
-    const content = document.getElementById('sentiment-content');
-    const sent = text.sentiment.overall;
-
-    content.innerHTML =
-        '<h3>Sentiment Analysis (VADER)</h3>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Compound Score:</span>' +
-            '<span class="metric-value">' + sent.compound + '</span>' +
-        '</div>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Positive:</span>' +
-            '<span class="metric-value">' + sent.pos + '</span>' +
-        '</div>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Negative:</span>' +
-            '<span class="metric-value">' + sent.neg + '</span>' +
-        '</div>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Neutral:</span>' +
-            '<span class="metric-value">' + sent.neu + '</span>' +
-        '</div>' +
-        '<p style="margin-top: 1rem; font-size: 0.9rem; color: #7f8c8d;">' +
-            'Sentences analyzed: ' + text.sentiment.total_sentences_analyzed +
-        '</p>';
-
-    // Render chart
-    const ctx = document.getElementById('sentiment-chart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Positive', 'Negative', 'Neutral'],
-            datasets: [{
-                label: 'Sentiment Scores',
-                data: [sent.pos, sent.neg, sent.neu],
-                backgroundColor: ['#27ae60', '#e74c3c', '#95a5a6']
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Sentiment Distribution',
-                    font: { family: 'Georgia', size: 16 }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 1
-                }
-            }
-        }
-    });
-}
-
-// Render style tab
-function renderStyleTab(text) {
-    const content = document.getElementById('style-content');
-    const vocab = text.vocabulary_richness;
-    const pos = text.pos_distribution;
-
-    content.innerHTML =
-        '<h3>Vocabulary Richness</h3>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Type-Token Ratio:</span>' +
-            '<span class="metric-value">' + vocab.type_token_ratio + '</span>' +
-        '</div>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Hapax Legomena:</span>' +
-            '<span class="metric-value">' + vocab.hapax_legomena + ' (' + vocab.hapax_percentage + '%)</span>' +
-        '</div>' +
-        '<div class="metric">' +
-            '<span class="metric-label">Yule\'s K:</span>' +
-            '<span class="metric-value">' + vocab.yules_k + '</span>' +
-        '</div>' +
-        '<h3 style="margin-top: 2rem;">Parts of Speech Distribution</h3>' +
-        '<p style="margin-top: 0.5rem; font-size: 0.9rem; color: #7f8c8d;">' +
-            'Based on ' + pos.total_tagged.toLocaleString() + ' tagged tokens' +
-        '</p>';
-
-    // Render POS chart
-    const ctx = document.getElementById('pos-chart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(pos.percentages),
-            datasets: [{
-                data: Object.values(pos.percentages),
-                backgroundColor: [
-                    '#3498db', '#e74c3c', '#2ecc71', '#f39c12',
-                    '#9b59b6', '#1abc9c', '#34495e', '#e67e22', '#95a5a6'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { font: { family: 'Georgia' } }
-                },
-                title: {
-                    display: true,
-                    text: 'Parts of Speech (%)',
-                    font: { family: 'Georgia', size: 16 }
-                }
-            }
-        }
-    });
-}
-
-// Show compare view
-function showCompareView() {
-    const checkboxes = document.querySelectorAll('#compare-selections input[type="checkbox"]:checked');
-
-    if (checkboxes.length < 2) {
-        alert('Please select at least 2 texts to compare');
-        return;
-    }
-
-    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
-    const selectedTexts = selectedIds.map(id => analysisData.texts.find(t => t.metadata.id === id));
-
-    // Switch to compare view
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('compare-view').classList.add('active');
-
-    // Render comparison
-    renderComparison(selectedTexts);
-}
-
-// Render comparison
-function renderComparison(texts) {
-    const content = document.getElementById('comparison-content');
-
-    // Word cloud canvases (for first two texts)
-    const wordCloudItems = texts.slice(0, 2).map((t, index) =>
-        '<div class="comparison-wordcloud-item">' +
-            '<h4>' + t.metadata.title + '</h4>' +
-            '<div style="background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">' +
-                '<canvas id="compare-canvas-' + index + '" style="width: 100%; height: 400px;"></canvas>' +
-            '</div>' +
-        '</div>'
-    ).join('');
-
-    const wordCountItems = texts.map(t =>
-        '<div class="comparison-item">' +
-            '<h4>' + t.metadata.title + '</h4>' +
-            '<p><strong>Total:</strong> ' + t.bag_of_words.total_words.toLocaleString() + '</p>' +
-            '<p><strong>Unique:</strong> ' + t.bag_of_words.unique_words.toLocaleString() + '</p>' +
-            '<p><strong>TTR:</strong> ' + t.vocabulary_richness.type_token_ratio + '</p>' +
-        '</div>'
-    ).join('');
-
-    const sentimentItems = texts.map(t =>
-        '<div class="comparison-item">' +
-            '<h4>' + t.metadata.title + '</h4>' +
-            '<p><strong>Compound:</strong> ' + t.sentiment.overall.compound + '</p>' +
-            '<p><strong>Positive:</strong> ' + t.sentiment.overall.pos + '</p>' +
-            '<p><strong>Negative:</strong> ' + t.sentiment.overall.neg + '</p>' +
-        '</div>'
-    ).join('');
-
-    const wordsItems = texts.map(t => {
-        const topWords = Object.entries(t.bag_of_words.word_frequencies)
-            .slice(0, 10)
-            .map(([word, freq]) => '<li>' + word + ' (' + freq + ')</li>')
-            .join('');
-
-        return '<div class="comparison-item">' +
-            '<h4>' + t.metadata.title + '</h4>' +
-            '<ul style="margin-left: 1rem; font-size: 0.9rem;">' + topWords + '</ul>' +
-        '</div>';
-    }).join('');
-
-    content.innerHTML =
-        '<div class="comparison-section">' +
-            '<h3 style="color: #2c3e50; margin-bottom: 1.5rem;">Word Cloud Comparison</h3>' +
-            '<div class="comparison-wordcloud-grid">' + wordCloudItems + '</div>' +
-        '</div>' +
-        '<div class="comparison-section">' +
-            '<h3>Word Count Comparison</h3>' +
-            '<div class="comparison-grid">' + wordCountItems + '</div>' +
-        '</div>' +
-        '<div class="comparison-section">' +
-            '<h3>Sentiment Comparison</h3>' +
-            '<div class="comparison-grid">' + sentimentItems + '</div>' +
-        '</div>' +
-        '<div class="comparison-section">' +
-            '<h3>Top 10 Words Comparison</h3>' +
-            '<div class="comparison-grid">' + wordsItems + '</div>' +
-        '</div>';
-
-    // Render word clouds for the first two texts
-    setTimeout(() => {
-        texts.slice(0, 2).forEach((text, index) => {
-            renderComparisonWordCloud(
-                text.bag_of_words.word_frequencies,
-                text.metadata.title,
-                'compare-canvas-' + index
-            );
+    let html = '';
+    topics.topics.forEach(topic => {
+        html += `<div class="mb-3">
+            <h6>Topic ${topic.topic_id}</h6>
+            <div>`;
+        topic.top_words.forEach(word => {
+            html += `<span class="topic-badge">${word}</span>`;
         });
+        html += `</div></div>`;
+    });
+
+    document.getElementById(selector.replace('#', '')).innerHTML = html;
+}
+
+function compareTexts() {
+    const text1Id = document.getElementById('text1Select').value;
+    const text2Id = document.getElementById('text2Select').value;
+
+    if (!text1Id || !text2Id) {
+        document.getElementById('comparisonDisplay').innerHTML = '';
+        return;
+    }
+
+    const text1 = analysisData.texts.find(t => t.metadata.id === text1Id);
+    const text2 = analysisData.texts.find(t => t.metadata.id === text2Id);
+
+    if (!text1 || !text2) return;
+
+    const html = `
+        <div class="comparison-section">
+            <h4 class="mb-4 text-center">Comparison</h4>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">${text1.metadata.title}</div>
+                        <div class="card-body">
+                            <div class="metric-row">
+                                <span class="metric-label">Words:</span>
+                                <span class="metric-value">${text1.bag_of_words.total_words.toLocaleString()}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Unique:</span>
+                                <span class="metric-value">${text1.bag_of_words.unique_words.toLocaleString()}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Lexical Diversity:</span>
+                                <span class="metric-value">${text1.vocabulary_richness.lexical_diversity}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Sentiment:</span>
+                                <span class="metric-value">${text1.sentiment.overall.compound}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Word Cloud</div>
+                        <div class="card-body">
+                            <div id="wordCloud1"></div>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Topics</div>
+                        <div class="card-body" id="topics1"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">${text2.metadata.title}</div>
+                        <div class="card-body">
+                            <div class="metric-row">
+                                <span class="metric-label">Words:</span>
+                                <span class="metric-value">${text2.bag_of_words.total_words.toLocaleString()}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Unique:</span>
+                                <span class="metric-value">${text2.bag_of_words.unique_words.toLocaleString()}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Lexical Diversity:</span>
+                                <span class="metric-value">${text2.vocabulary_richness.lexical_diversity}</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Sentiment:</span>
+                                <span class="metric-value">${text2.sentiment.overall.compound}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Word Cloud</div>
+                        <div class="card-body">
+                            <div id="wordCloud2"></div>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Topics</div>
+                        <div class="card-body" id="topics2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('comparisonDisplay').innerHTML = html;
+
+    // Render visualizations
+    setTimeout(() => {
+        renderWordCloud(text1.bag_of_words.word_frequencies, '#wordCloud1');
+        renderWordCloud(text2.bag_of_words.word_frequencies, '#wordCloud2');
+        renderTopics(text1.topics, '#topics1');
+        renderTopics(text2.topics, '#topics2');
     }, 100);
 }
-
-// Render word cloud for comparison view
-function renderComparisonWordCloud(wordFrequencies, title, canvasId) {
-    const canvas = document.getElementById(canvasId);
-
-    if (!canvas) {
-        console.error('Canvas not found:', canvasId);
-        return;
-    }
-
-    console.log(`Rendering comparison word cloud: ${title} on ${canvasId}`);
-
-    // Get top 10 words for clear, focused comparison clouds
-    const topWords = Object.entries(wordFrequencies)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
-    if (topWords.length === 0) {
-        canvas.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">No words to display</p>';
-        return;
-    }
-
-    // Vibrant colors
-    const vibrantColors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
-        '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B3D9',
-        '#EC7063', '#5DADE2', '#48C9B0', '#F39C12', '#AF7AC5',
-        '#EB984E', '#5499C7', '#45B39D', '#E74C3C', '#3498DB',
-        '#1ABC9C', '#F39C12', '#9B59B6', '#E67E22', '#16A085',
-        '#D35400', '#8E44AD', '#2980B9', '#27AE60', '#C0392B'
-    ];
-
-    // Calculate sizes
-    const maxFreq = topWords[0][1];
-    const minFreq = topWords[topWords.length - 1][1];
-    const range = maxFreq - minFreq;
-
-    // Replace canvas with HTML word cloud
-    const cloudDiv = document.createElement('div');
-    cloudDiv.className = 'html-word-cloud';
-    cloudDiv.style.minHeight = '400px';
-
-    topWords.forEach(([word, freq], index) => {
-        const wordSpan = document.createElement('span');
-        wordSpan.className = 'cloud-word';
-        wordSpan.textContent = word;
-
-        // Calculate font size - larger for top 10
-        let fontSize;
-        if (range === 0) {
-            fontSize = 44;
-        } else {
-            const normalized = (freq - minFreq) / range;
-            const scaled = Math.pow(normalized, 0.5);
-            fontSize = 24 + (scaled * 48); // 24px to 72px for better visibility
-        }
-
-        // Assign color from palette
-        const color = vibrantColors[index % vibrantColors.length];
-
-        // Random slight rotation
-        const rotation = (Math.random() - 0.5) * 20;
-
-        wordSpan.style.fontSize = fontSize + 'px';
-        wordSpan.style.color = color;
-        wordSpan.style.transform = `rotate(${rotation}deg)`;
-        wordSpan.title = `${word}: ${freq} occurrences`;
-
-        cloudDiv.appendChild(wordSpan);
-    });
-
-    // Replace canvas with HTML cloud
-    canvas.parentElement.replaceChild(cloudDiv, canvas);
-    cloudDiv.id = canvasId;
-
-    console.log('Comparison HTML word cloud rendered:', title, 'with', topWords.length, 'words');
-}
-
-// Initialize on page load
-window.addEventListener('DOMContentLoaded', loadData);

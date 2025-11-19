@@ -4,87 +4,190 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Distant Reading: 19th Century Women Poets</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        #wordCloud {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .word-cloud-word {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .word-cloud-word:hover {
+            opacity: 0.8;
+            transform: scale(1.1);
+        }
+
+        .topic-badge {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .comparison-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .metric-row {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .metric-value {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .select-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .select-section label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Distant Reading Analysis</h1>
-            <h2>19th Century Women Poets</h2>
-        </header>
+        <div class="main-container">
+            <div class="header">
+                <h1>Distant Reading Analysis</h1>
+                <p class="lead mb-0">19th Century Women Poets</p>
+                <small>Emily Dickinson • Elizabeth Barrett Browning • Adelaide Anne Procter</small>
+            </div>
 
-        <div class="main-content">
-            <aside class="sidebar">
-                <h3>Navigation</h3>
-
-                <div class="nav-section">
-                    <h4>View By Text</h4>
-                    <ul id="text-list" class="nav-list"></ul>
-                </div>
-
-                <div class="nav-section">
-                    <h4>View By Author</h4>
-                    <ul id="author-list" class="nav-list"></ul>
-                </div>
-
-                <div class="nav-section">
-                    <h4>Compare</h4>
-                    <button id="compare-btn" class="btn-compare">Compare Selected</button>
-                    <div id="compare-selections"></div>
-                </div>
-            </aside>
-
-            <main class="content-area">
-                <div id="view-container">
-                    <div id="overview-view" class="view active">
-                        <h2>Corpus Overview</h2>
-                        <div class="overview-stats"></div>
+            <!-- Mode Selection -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-lg btn-primary" id="singleViewBtn" onclick="switchMode('single')">Single Text View</button>
+                        <button type="button" class="btn btn-lg btn-outline-primary" id="compareViewBtn" onclick="switchMode('compare')">Compare Two Texts</button>
                     </div>
+                </div>
+            </div>
 
-                    <div id="text-view" class="view">
-                        <h2 id="text-title"></h2>
-                        <div class="tabs">
-                            <button class="tab active" data-tab="metadata">Overview</button>
-                            <button class="tab" data-tab="wordcloud">Word Cloud</button>
-                            <button class="tab" data-tab="sentiment">Sentiment</button>
-                            <button class="tab" data-tab="style">Style</button>
-                        </div>
-
-                        <div class="tab-content">
-                            <div id="tab-metadata" class="tab-pane active">
-                                <div id="metadata-content"></div>
-                            </div>
-                            <div id="tab-wordcloud" class="tab-pane">
-                                <canvas id="wordcloud-canvas"></canvas>
-                                <div id="word-list"></div>
-                            </div>
-                            <div id="tab-sentiment" class="tab-pane">
-                                <div id="sentiment-content"></div>
-                                <canvas id="sentiment-chart"></canvas>
-                            </div>
-                            <div id="tab-style" class="tab-pane">
-                                <div id="style-content"></div>
-                                <canvas id="pos-chart"></canvas>
-                            </div>
+            <!-- Single View -->
+            <div id="singleView">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="select-section">
+                            <label for="textSelect">Select a Text:</label>
+                            <select class="form-select form-select-lg" id="textSelect" onchange="displayText()">
+                                <option value="">Choose a text...</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
-                    <div id="compare-view" class="view">
-                        <h2>Comparison View</h2>
-                        <div id="comparison-content"></div>
+                <div id="textDisplay"></div>
+            </div>
+
+            <!-- Compare View -->
+            <div id="compareView" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="select-section">
+                            <label for="text1Select">First Text:</label>
+                            <select class="form-select form-select-lg" id="text1Select" onchange="compareTexts()">
+                                <option value="">Choose first text...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="select-section">
+                            <label for="text2Select">Second Text:</label>
+                            <select class="form-select form-select-lg" id="text2Select" onchange="compareTexts()">
+                                <option value="">Choose second text...</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </main>
+
+                <div id="comparisonDisplay"></div>
+            </div>
         </div>
-
-        <footer>
-            <p>Corpus: Project Gutenberg texts of 19th-century women poets</p>
-        </footer>
     </div>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Embedded Data -->
     <script src="data-embed.js"></script>
+
+    <!-- Main Application -->
     <script src="app.js"></script>
 </body>
 </html>
